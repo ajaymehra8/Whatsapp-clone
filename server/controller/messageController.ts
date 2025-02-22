@@ -66,10 +66,7 @@ export const doMessage = catchAsync(
       content,
     });
 
-    message = await Message.findById(message._id).populate([
-      { path: "sender" },
-      { path: "chat" },
-    ]);
+    message = await Message.findById(message._id).populate("chat");
     if (newChat) {
       if (message) {
         chatToSend.messages = [message];

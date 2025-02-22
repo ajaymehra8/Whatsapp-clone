@@ -137,8 +137,6 @@ export const getChat = catchAsync(
     }
     const messages: IMessage[] = await Message.find({
       chat: chat?._id,
-    }).populate({
-      path: "sender",
     });
     chatToSend.messages = messages;
 

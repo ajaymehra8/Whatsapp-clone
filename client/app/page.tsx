@@ -28,7 +28,6 @@ export default function Home() {
     async (newMessage:Message) => {
       console.log(newMessage.sender, selectedChat);
       if (selectedChat && newMessage.sender=== selectedChat.userId) {
-        console.log("work");
         setSelectedChat((prevSelectedChat:ChatType|null) => (
           prevSelectedChat?{
           ...prevSelectedChat,
@@ -41,7 +40,7 @@ export default function Home() {
           prevChats.map((chat) => {
             const newCount = chat.count + 1;
 
-            return chat._id === newMessage.chat
+            return chat._id === newMessage.chat._id
               ? { ...chat, count: newCount }
               : chat;
           })
@@ -49,7 +48,7 @@ export default function Home() {
       }
       setChats((prevChats) =>
         prevChats.map((chat) =>
-          chat._id === newMessage.chat
+          chat._id === newMessage.chat._id
             ? { ...chat, topMessage: newMessage }
             : chat
         )
