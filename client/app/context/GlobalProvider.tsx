@@ -8,16 +8,9 @@ import {
 } from "react";
 import { Socket } from "socket.io-client";
 import getSocket from "@/lib/socket";
-import { chatType } from "../types/allTypes";
+import { ChatType, Message } from "../types/allTypes";
 
-interface ChatType {
-  _id: string;
-  name: string;
-  latestMessage?: string;
-  userId?: string;
-  count: number;
-  lastSeen?: Date | string;
-}
+
 // Define the shape of the context
 interface GlobalContextType {
   selectedChat: ChatType | null;
@@ -114,7 +107,7 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
           );
         }
       };
-      const handleNewChat = (chat: chatType) => {
+      const handleNewChat = (chat: ChatType) => {
         setChats((prevChats) => [chat, ...prevChats]);
       };
       socket.on("update_users", handleOnlineUsers);

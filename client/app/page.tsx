@@ -9,13 +9,9 @@ import { useRouter, usePathname } from "next/navigation";
 import { useGlobalState } from "./context/GlobalProvider";
 import { SlControlPause } from "react-icons/sl";
 import { notifyUser } from "./utils/api";
+import { ChatType, Message } from "./types/allTypes";
 // Define a theme (optional)
-interface Message {
-  _id: string; // Assuming MongoDB ObjectId is a string
-  sender: string; // User ID of the sender
-  text: string;
-  createdAt: string; // ISO Date string
-}
+
 
 export default function Home() {
   const { selectedChat, socket, setChats, setSelectedChat } = useGlobalState();
@@ -29,14 +25,15 @@ export default function Home() {
     audio.play();
   };
   const handleMessageReceived = useCallback(
-    async (newMessage) => {
-      console.log(newMessage.sender._id, selectedChat);
-      if (selectedChat && newMessage.sender._id === selectedChat.userId) {
+    async (newMessage:Message) => {
+      console.log(newMessage.sender, selectedChat);
+      if (selectedChat && newMessage.sender=== selectedChat.userId) {
         console.log("work");
-        setSelectedChat((prevSelectedChat) => ({
+        setSelectedChat((prevSelectedChat:ChatType|null) => (
+          prevSelectedChat?{
           ...prevSelectedChat,
           messages: [...prevSelectedChat.messages, newMessage],
-        }));
+        }:null));
         console.log(selectedChat);
       } else {
         playSound();
@@ -44,7 +41,7 @@ export default function Home() {
           prevChats.map((chat) => {
             const newCount = chat.count + 1;
 
-            return chat._id === newMessage.chat._id
+            return chat._id === newMessage.chat
               ? { ...chat, count: newCount }
               : chat;
           })
@@ -52,7 +49,7 @@ export default function Home() {
       }
       setChats((prevChats) =>
         prevChats.map((chat) =>
-          chat._id === newMessage.chat._id
+          chat._id === newMessage.chat
             ? { ...chat, topMessage: newMessage }
             : chat
         )

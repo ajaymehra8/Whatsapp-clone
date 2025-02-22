@@ -36,7 +36,7 @@ const ChatBox:React.FC<chatBoxProps> = ({ messages, boxRef}) => {
           return (
             <div
               className={`message ${
-                message?.sender._id=== myId
+                message?.sender=== myId
                   ? "user-message"
                   : "other-user-message"
               }`}
