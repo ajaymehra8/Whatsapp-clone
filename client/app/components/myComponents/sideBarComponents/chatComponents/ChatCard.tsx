@@ -4,7 +4,6 @@ import { useGlobalState } from "@/app/context/GlobalProvider";
 import { chats } from "@/app/utils/api";
 import { Avatar, Box } from "@chakra-ui/react";
 import { AxiosError } from "axios";
-import { useMemo } from "react";
 
 const ChatCard = ({ chat }: { chat: any }) => {
   const { selectedChat, setSelectedChat,setChats,user,isTyping } = useGlobalState();

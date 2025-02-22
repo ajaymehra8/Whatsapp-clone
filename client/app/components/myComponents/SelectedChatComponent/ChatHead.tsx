@@ -7,9 +7,13 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 
 
 import { Tooltip } from "../../ui/tooltip";
+
 const ChatHead = () => {
   const { selectedChat, dark, onlineUsers,setSelectedChat,isTyping } = useGlobalState();
-  function formatTimestamp(timestamp: Date | string | number): string {
+  function formatTimestamp(timestamp: Date | string | number|undefined): string {
+    if(!timestamp){
+      return "";
+    }
     const date: Date = new Date(timestamp);
     const now: Date = new Date();
     
@@ -37,6 +41,9 @@ const ChatHead = () => {
 const handleBackClick=()=>{
   setSelectedChat(null);
 };
+if(!selectedChat){
+  return null;
+}
   return (
     <Box
       h={"10vh"}
@@ -89,9 +96,9 @@ const handleBackClick=()=>{
               marginTop: "-2px",
             }}
           >
-            {onlineUsers.includes(selectedChat.userId||selectedChat._id)
+            {onlineUsers.includes(selectedChat?.userId||selectedChat?._id)
               ? (isTyping?"typing...":"Online")
-              : (isTyping?"typing...":`last seen at ${formatTimestamp(selectedChat.lastSeen)}`)}{" "}
+              : (isTyping?"typing...":`last seen at ${formatTimestamp(selectedChat?.lastSeen)}`)}{" "}
           </p>
         </div>
       </Box>

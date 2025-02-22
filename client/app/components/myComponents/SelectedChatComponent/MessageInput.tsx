@@ -7,7 +7,7 @@ import { useGlobalState } from "@/app/context/GlobalProvider";
 import { doMessage, notifyUser } from "@/app/utils/api";
 import { toaster } from "../../ui/toaster";
 import { AxiosError } from "axios";
-import { chatType } from "@/app/types/allTypes";
+import { ChatType } from "@/app/types/allTypes";
 let typingTimeOut: NodeJS.Timeout | null = null;
 
 const MessageInput = () => {
@@ -29,19 +29,25 @@ const handleMessageChange=(e:React.ChangeEvent<HTMLTextAreaElement>)=>{
 };
   const sendMessage = async () => {
     try {
+      if(!selectedChat) return;
       const { data } = await doMessage(selectedChat._id, message);
+      
       if(data.newChat){
         setSelectedChat(data.chat);
         socket.emit("new_chat",data.chat);
         socket.emit("join_chat", data.chat._id); // Emit event to server
 
       }else{
-      setSelectedChat((prevChat:chatType)=>({...prevChat,messages:[...prevChat.messages,data.newMessage]}));
+      setSelectedChat((prevChat:ChatType|null)=>(
+       prevChat? {...prevChat,messages:[...prevChat.messages,data.newMessage]}:null
+      ));
       }
       socket.emit("send_message", data.newMessage);
+      if(selectedChat){
       if (!onlineUsers.includes(selectedChat.userId)) {
         await notifyUser(selectedChat._id);
       }
+    }
       // want to change from here
       setChats((prevChats) =>
         prevChats.map((chat) =>
