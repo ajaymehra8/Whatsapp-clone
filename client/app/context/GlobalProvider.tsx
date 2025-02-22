@@ -5,6 +5,7 @@ import {
   useState,
   ReactNode,
   useEffect,
+  useMemo
 } from "react";
 import { Socket } from "socket.io-client";
 import getSocket from "@/lib/socket";
@@ -38,11 +39,15 @@ const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
 // Provider component
 export const GlobalProvider = ({ children }: { children: ReactNode }) => {
   const [selectedChat, setSelectedChat] = useState<ChatType | null>(null); // Example global state
-  const [dark, setDark] = useState<boolean>(
-    window.matchMedia("(prefers-color-scheme: dark)").matches
-  );
+ 
   const [chats, setChats] = useState<ChatType[]>([]);
+  const [dark, setDark] = useState<boolean>(false);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setDark(window.matchMedia("(prefers-color-scheme: dark)").matches);
+    }
+  }, []);
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const [user, setUser] = useState<any>(null);
   const [online, setOnline] = useState<boolean>(false);
