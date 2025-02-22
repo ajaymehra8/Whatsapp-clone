@@ -9,14 +9,12 @@ import { useMemo } from "react";
 const ChatCard = ({ chat }: { chat: any }) => {
   const { selectedChat, setSelectedChat,setChats,user,isTyping } = useGlobalState();
   const { dark, socket } = useGlobalState();
-  function formatTimestamp(timestamp) {
-    if(!timestamp){
-      return "";
-    }
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffMs = now - date;
-    const diffHours = diffMs / (1000 * 60 * 60);
+  function formatTimestamp(timestamp: Date | string | number): string {
+    const date: Date = new Date(timestamp);
+    const now: Date = new Date();
+    
+    const diffMs: number = now.getTime() - date.getTime(); // Ensure number type
+    const diffHours: number = diffMs / (1000 * 60 * 60);
 
     if (diffHours < 24) {
         // Format time like 2:30 PM or 2:00 AM
@@ -35,7 +33,8 @@ const ChatCard = ({ chat }: { chat: any }) => {
         });
     }
 }
-  const setChat = async (id) => {
+
+  const setChat = async (id:string) => {
     try {
       const { data } = await chats(id);
       if (data.success) {

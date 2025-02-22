@@ -9,19 +9,11 @@ import ChatBox from "./SelectedChatComponent/ChatBox";
 import MessageInput from "./SelectedChatComponent/MessageInput";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { select } from "framer-motion/client";
-interface Message {
-  _id: string; // Assuming MongoDB ObjectId is a string
-  sender: string; // User ID of the sender
-  text: string;
-  createdAt: string; // ISO Date string
-}
-interface selectedChatProps{
-  messages:Message[];
-  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
-}
+import { Message,selectedChatProps,chatType} from "@/app/types/allTypes";
+
 const SelectedChat:React.FC<selectedChatProps> = ({messages,setMessages}) => {
   const { selectedChat,socket,isTyping,setIsTyping } = useGlobalState();
-  const chatBoxRef = useRef(null);
+  const chatBoxRef = useRef<HTMLDivElement | null>(null);
   const fetchMessages = useCallback(() => {
     if (selectedChat) setMessages(selectedChat.messages);
   }, [selectedChat]);
@@ -30,16 +22,17 @@ const SelectedChat:React.FC<selectedChatProps> = ({messages,setMessages}) => {
   }, [fetchMessages]);
 
  useEffect(()=>{
-  const handleTyping=(chat)=>{
+  const handleTyping=(chat:chatType)=>{
+    console.log(chat);
     setIsTyping(true)
     
   };
       socket.on("typing",handleTyping);
-      socket.on("stop_typing",(chat)=>setIsTyping(false));
+      socket.on("stop_typing",(chat:chatType)=>setIsTyping(false));
 
       return ()=>{
         socket.off("typing",handleTyping);
-        socket.off("stop_typing",(chat)=>setIsTyping(false));
+        socket.off("stop_typing",(chat:chatType)=>setIsTyping(false));
       }
 
  },[])

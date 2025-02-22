@@ -2,11 +2,13 @@
 import { useGlobalState } from "@/app/context/GlobalProvider";
 import { Box } from "@chakra-ui/react";
 import React, { useEffect, useState, useMemo } from "react";
-const ChatBox = ({ messages, boxRef}) => {
+import { chatBoxProps, Message } from "@/app/types/allTypes";
+
+const ChatBox:React.FC<chatBoxProps> = ({ messages, boxRef}) => {
   const { dark, user } = useGlobalState();
   const myId = user._id;
   useEffect(() => {
-    if (boxRef) {
+    if (boxRef.current) {
       boxRef.current.scrollTop = boxRef.current.scrollHeight;
     }
   }, [messages]);
@@ -34,7 +36,7 @@ const ChatBox = ({ messages, boxRef}) => {
           return (
             <div
               className={`message ${
-                message?.sender?._id === myId
+                message?.sender._id=== myId
                   ? "user-message"
                   : "other-user-message"
               }`}
