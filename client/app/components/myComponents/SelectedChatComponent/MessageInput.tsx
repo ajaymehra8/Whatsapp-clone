@@ -7,13 +7,14 @@ import { useGlobalState } from "@/app/context/GlobalProvider";
 import { doMessage, notifyUser } from "@/app/utils/api";
 import { toaster } from "../../ui/toaster";
 import { AxiosError } from "axios";
+import { chatType } from "@/app/types/allTypes";
 let typingTimeOut: NodeJS.Timeout | null = null;
 
 const MessageInput = () => {
   const [message, setMessage] = useState<string>("");
   const { dark, selectedChat, socket, setChats, onlineUsers,setSelectedChat,isTyping,setIsTyping } =
     useGlobalState();
-const handleMessageChange=(e)=>{
+const handleMessageChange=(e:React.ChangeEvent<HTMLTextAreaElement>)=>{
   setMessage(e.target.value);
   if (!isTyping) {
     socket.emit("typing", selectedChat);
@@ -35,7 +36,7 @@ const handleMessageChange=(e)=>{
         socket.emit("join_chat", data.chat._id); // Emit event to server
 
       }else{
-      setSelectedChat((prevChat)=>({...prevChat,messages:[...prevChat.messages,data.newMessage]}));
+      setSelectedChat((prevChat:chatType)=>({...prevChat,messages:[...prevChat.messages,data.newMessage]}));
       }
       socket.emit("send_message", data.newMessage);
       if (!onlineUsers.includes(selectedChat.userId)) {

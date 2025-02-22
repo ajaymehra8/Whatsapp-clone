@@ -9,12 +9,12 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 import { Tooltip } from "../../ui/tooltip";
 const ChatHead = () => {
   const { selectedChat, dark, onlineUsers,setSelectedChat,isTyping } = useGlobalState();
-  function formatTimestamp(timestamp) {
-    const date = new Date(timestamp);
-    const now = new Date();
+  function formatTimestamp(timestamp: Date | string | number): string {
+    const date: Date = new Date(timestamp);
+    const now: Date = new Date();
     
-    const diffMs = now - date;
-    const diffHours = diffMs / (1000 * 60 * 60);
+    const diffMs: number = now.getTime() - date.getTime(); // Ensure number type
+    const diffHours: number = diffMs / (1000 * 60 * 60);
 
     if (diffHours < 24) {
         // Format time like 2:30 PM or 2:00 AM
@@ -33,6 +33,7 @@ const ChatHead = () => {
         });
     }
 }
+
 const handleBackClick=()=>{
   setSelectedChat(null);
 };
