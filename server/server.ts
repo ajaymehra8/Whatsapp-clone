@@ -15,6 +15,7 @@ dotenv.config();
 const app: Express = express();
 const server = http.createServer(app);
 const io = new Server(server, {
+  transports: ["websocket"], // Force WebSockets only
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
@@ -22,7 +23,7 @@ const io = new Server(server, {
   },
 });
 db();
-
+const PORT:number|string=process.env.PORT||8000;
 app.use(cors());
 app.use(express.json());
 
@@ -49,4 +50,4 @@ app.use("*", (req: Request, res: Response) => {
 // ERROR MIDDLEWARE
 app.use(errorMiddleware);
 
-server.listen(8000, () => console.log(`Listening on port 8000`));
+server.listen(PORT, () => console.log(`Listening on port 8000`));
