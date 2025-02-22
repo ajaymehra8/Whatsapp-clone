@@ -26,6 +26,8 @@ const socketHandler = (io: Server) => {
     socket.on(
       "send_message",
       (data: { chat: { users: string[] }; sender: { _id: string } }) => {
+        console.log("send message back");
+
         const { chat, sender } = data;
 
         if (!chat.users || !Array.isArray(chat.users)) {
@@ -62,12 +64,15 @@ const sender=chat.sender;
   }
 );
     socket.on("typing", (room) => {
+      console.log("typing back");
       if (room?._id) {
         socket.to(room._id).emit("typing", room);
       }
     });
 
     socket.on("stop_typing", (room) => {
+      console.log("stop typing back");
+
       if (room?._id) {
         socket.to(room._id).emit("stop_typing", room);
       }
