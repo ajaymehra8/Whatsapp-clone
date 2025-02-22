@@ -8,18 +8,20 @@ import {
 } from "react";
 import { Socket } from "socket.io-client";
 import getSocket from "@/lib/socket";
+import { chatType } from "../types/allTypes";
 
 interface ChatType {
   _id: string;
   name: string;
   latestMessage?: string;
   userId?: string;
-  count:number;
+  count: number;
+  lastSeen?: Date | string;
 }
 // Define the shape of the context
 interface GlobalContextType {
-  selectedChat: any;
-  setSelectedChat: React.Dispatch<React.SetStateAction<any>>;
+  selectedChat: ChatType | null;
+  setSelectedChat: React.Dispatch<React.SetStateAction<ChatType | null>>;
   dark: boolean;
   setDark: React.Dispatch<React.SetStateAction<boolean>>;
   user: any;
@@ -33,8 +35,8 @@ interface GlobalContextType {
   setOnlineUsers: React.Dispatch<React.SetStateAction<string[]>>;
   chats: ChatType[];
   setChats: React.Dispatch<React.SetStateAction<ChatType[]>>;
-  isTyping:boolean;
-  setIsTyping:React.Dispatch<React.SetStateAction<boolean>>;
+  isTyping: boolean;
+  setIsTyping: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 // Create context with a default value
@@ -42,7 +44,7 @@ const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
 
 // Provider component
 export const GlobalProvider = ({ children }: { children: ReactNode }) => {
-  const [selectedChat, setSelectedChat] = useState<any>(null); // Example global state
+  const [selectedChat, setSelectedChat] = useState<ChatType | null>(null); // Example global state
   const [dark, setDark] = useState<boolean>(
     window.matchMedia("(prefers-color-scheme: dark)").matches
   );
@@ -53,7 +55,7 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
   const [online, setOnline] = useState<boolean>(false);
   const [token, setToken] = useState<any>(null);
   const [fetchAgain, setFetchAgain] = useState<boolean>(false);
-const [isTyping,setIsTyping]=useState<boolean>(false);
+  const [isTyping, setIsTyping] = useState<boolean>(false);
   const socket = getSocket(); // Initialize socket
 
   // Listen for system theme changes
@@ -103,27 +105,30 @@ const [isTyping,setIsTyping]=useState<boolean>(false);
         userId: string;
         lastSeen: string;
       }) => {
-        if(selectedChat.userId===data.userId){
+        if (selectedChat?.userId === data.userId) {
           console.log(selectedChat);
-        setSelectedChat((prevSelectedChat)=>({...prevSelectedChat,lastSeen:data.lastSeen}));
+          setSelectedChat((prevSelectedChat: ChatType|null) =>
+            prevSelectedChat!==null
+              ? { ...prevSelectedChat, lastSeen: data.lastSeen }
+              : null
+          );
         }
-      };        
-      const handleNewChat=(chat)=>{
-        setChats((prevChats)=>([chat,...prevChats]));
-      }
+      };
+      const handleNewChat = (chat: chatType) => {
+        setChats((prevChats) => [chat, ...prevChats]);
+      };
       socket.on("update_users", handleOnlineUsers);
       socket.on("user_status_changed", handleStatusChanged);
-      socket.on("new_chat",handleNewChat);
+      socket.on("new_chat", handleNewChat);
       // Clean up the socket event listener
       return () => {
         socket.off("setup");
         socket.off("update_users", handleOnlineUsers);
         socket.off("user_status_changed", handleStatusChanged);
-        socket.off("new_chat",handleNewChat);
-
+        socket.off("new_chat", handleNewChat);
       };
     }
-  }, [user, socket,selectedChat]); // Depend on user and socket for emitting the event
+  }, [user, socket, selectedChat]); // Depend on user and socket for emitting the event
 
   return (
     <GlobalContext.Provider
@@ -144,7 +149,7 @@ const [isTyping,setIsTyping]=useState<boolean>(false);
         chats,
         setChats,
         isTyping,
-        setIsTyping
+        setIsTyping,
       }}
     >
       {children}
