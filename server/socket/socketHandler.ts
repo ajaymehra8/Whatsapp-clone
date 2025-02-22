@@ -25,8 +25,7 @@ const socketHandler = (io: Server) => {
     // Handle new messages
     socket.on(
       "send_message",
-      (data: { chat: { users: string[] }; sender: { _id: string } }) => {
-        console.log("send message back");
+      (data: { chat: { users: string[] }; sender:string }) => {
 
         const { chat, sender } = data;
 
@@ -35,7 +34,7 @@ const socketHandler = (io: Server) => {
         }
 
         chat.users.forEach((userId: string) => {
-          if (userId !== sender._id) {
+          if (userId !== sender) {
             const receiverSocketId = users.get(userId);
             if (receiverSocketId) {
               io.to(receiverSocketId).emit("message_received", data);

@@ -1,12 +1,16 @@
 import { MutableRefObject } from "react";
+export interface chat{
+  _id:string,
 
+}
 export interface Message {
-    _id: string; // Assuming MongoDB ObjectId is a string
-    sender:string; // User ID of the sender
-    content: string;
-    createdAt: string; // ISO Date string
-    chat:string;
-  };
+  _id: string; // Assuming MongoDB ObjectId is a string
+  sender:string; // User ID of the sender
+  content: string;
+  createdAt: string; // ISO Date string
+  chat:chat;
+};
+  
 export  interface selectedChatProps{
     messages:Message[];
     setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
