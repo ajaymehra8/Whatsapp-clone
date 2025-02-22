@@ -1,0 +1,226 @@
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --line-color:#e9edef;
+  --scrollbar-background:#ffffff;
+  --scrollbar-thumb:#c1bfba;
+  --rounded-btn-bg:#f0f2f5;
+  --rounded-btn-color:#6d6596;
+--rounded-btn-clicked-bg:#e7e8eb;
+--rounded-btn-clicked-color:#25808c;
+--rounded-btn-hover-bg:#e7e8eb;
+--user-message-bg:#d9fdd3;
+--other-user-message-bg:#fff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #111b21;
+    --foreground: #ededed;
+    --line-color:#222d34;
+    --scrollbar-background:#111b21;
+    --scrollbar-thumb:#374045;
+    --rounded-btn-bg:#202c33;
+    --rounded-btn-color:gray;
+    --rounded-btn-clicked-bg:#0a332c;
+    --rounded-btn-clicked-color:#00a86d;
+    --rounded-btn-hover-bg:#2a3942;
+    --user-message-bg:#005c4b;
+    --other-user-message-bg:#202c33;
+    --notification-color:#00a884;
+
+  }
+}
+*{
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+}
+
+/* CHATS BOX CSS */
+.roundedBtn{
+  border: none;
+  text-align: center;
+  border-radius: 50px;
+  padding: 3px 10px;
+  background: var(--rounded-btn-bg);
+  font-size: 14px;
+  color: var(--rounded-btn-color);
+  cursor: pointer;
+  transition: all .5s;
+}
+
+.roundedBtn:hover{
+  background: var(--rounded-btn-hover-bg);
+}
+.roundedBtnActive{
+  background: var(--rounded-btn-clicked-bg);
+  color: var(--rounded-btn-clicked-color);
+}
+
+.line{
+  width: 80%;
+  height: 1px;
+  background:var(--line-color);
+  position: absolute;
+  right: 0;
+
+}
+.textBox{
+  padding: 0;
+  margin: 0;
+  width: auto;
+  min-height: 4vh;
+  display: flex;
+  align-items: start;
+  justify-content: center;
+  flex-direction: column;
+}
+.no-content{
+  font-size: clamp(25px,6vw,55px);
+}
+.message{
+  display: flex;
+  flex-direction: column;
+  width:fit-content;
+  margin-top:3px;
+  max-width: 50%;
+  padding:3px 5px;
+  position:relative;
+  border-radius:5px;
+  font-size:14px;
+}
+
+.other-user-message{
+  background:var(--other-user-message-bg);
+   
+}
+.message-time{
+ 
+  align-self: flex-end;
+  margin-left: 20px;
+  margin-right:3px;
+  font-size:clamp(8px,2vw,10px);
+  color:#92a091;
+}
+.user-message{
+  background:var(--user-message-bg);
+align-self:flex-end;
+}
+/* SCROLLBAR CSS */
+/* Width of the scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* Track (background) */
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-background);
+  border-radius: 10px;
+}
+
+/* Handle (draggable part) */
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+}
+.send-message-input:focus{
+  border: none;
+  outline: none;
+}
+.submit-btn{
+  background: #000;
+  padding: 10px 20px;
+  border-radius: 50px;
+  transition: all 1;
+  cursor: pointer;
+  text-align: left;
+  align-self: left!important;
+  margin-top: 30px;
+  color: white;
+  letter-spacing: 1px;
+}
+.submit-btn:hover{
+  transform: translateY(2px);
+}
+.no-item-text{
+  align-self: center; 
+  margin-top: auto;
+  margin-bottom: auto; 
+  font-size: clamp(20px,4vw,30px);
+  letter-spacing: 1px;
+}
+.backBtn{
+  display: none;
+}
+.notification{
+  background-color:#00a884;
+  color: var(--background);
+  font-size: 12px;
+  height: 20px;
+  width: 20px;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+}
+.chatCardCorner{
+  position: absolute;
+  right: 5%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+}
+.cardTime{
+  font-size: 11px;
+}
+.typing-status{
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--foreground);
+}
+@media (width<770px) {
+  .backBtn{
+    display: inherit;
+  }
+  .line{
+    display: none;
+  }
+  
+}
