@@ -20,17 +20,17 @@ const Setting = () => {
     {
       id: 1,
       name: "Account",
-      icon: <CgProfile size={"20px"} style={{ color: "#d1d7db" }} />,
+      icon: CgProfile,
     },
     {
       id: 2,
       name: "Privacy",
-      icon: <FaLock size={"20px"} style={{ color: "#d1d7db" }} />,
+      icon: FaLock,
     },
     {
       id: 3,
       name: "Chats",
-      icon: <MdOutlineComment size={"20px"} style={{ color: "#d1d7db" }} />,
+      icon: MdOutlineComment,
     },
   ];
   return (

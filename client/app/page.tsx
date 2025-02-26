@@ -46,23 +46,25 @@ export default function Home() {
           })
         );
       }
-      setChats((prevChats) => {
+      setChats((prevChats: ChatType[]) => {
         const updatedChats = prevChats.map((chat) =>
           chat?._id === newMessage.chat?._id
             ? { ...chat, topMessage: newMessage }
             : chat
         );
       
-        // Move the updated chat to the front
-        return [
-          updatedChats.find((chat) => chat?._id === newMessage.chat?._id),
-          ...updatedChats.filter((chat) => chat?._id !== newMessage.chat?._id),
-        ];
+        // Find the updated chat and ensure it's not undefined
+        const updatedChat = updatedChats.find((chat) => chat?._id === newMessage.chat?._id);
+      
+        // If updatedChat is found, move it to the front; otherwise, return the original updatedChats
+        return updatedChat ? [updatedChat, ...updatedChats.filter((chat) => chat?._id !== newMessage.chat?._id)] : updatedChats;
       });
+      
     },
     [selectedChat, socket]
   );
   useEffect(() => {
+    if(socket){
     socket.on("message_received", handleMessageReceived);
     // Cleanup function to remove the event listener
 
@@ -70,6 +72,7 @@ export default function Home() {
       socket.off("message_received", handleMessageReceived);
       console.log("useEffect cleanup - socket listener removed");
     };
+  }
   }, [handleMessageReceived]);
 
   useEffect(() => {
