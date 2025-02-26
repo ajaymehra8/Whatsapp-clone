@@ -24,7 +24,7 @@ interface GlobalContextType {
   setToken: React.Dispatch<React.SetStateAction<any>>;
   fetchAgain: boolean;
   setFetchAgain: React.Dispatch<React.SetStateAction<boolean>>;
-  socket: typeof Socket; // Define socket in the context
+  socket: typeof Socket|null; // Define socket in the context
   onlineUsers: string[];
   setOnlineUsers: React.Dispatch<React.SetStateAction<string[]>>;
   chats: ChatType[];

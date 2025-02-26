@@ -2,7 +2,15 @@
 import React from 'react'
 import { Box } from '@chakra-ui/react';
 import { useGlobalState } from '@/app/context/GlobalProvider';
-const SettingCard = ({setting}) => {
+import { IconType } from "react-icons";
+
+interface PropType{
+  setting:{
+    icon:IconType,
+    name:string
+  }
+}
+const SettingCard:React.FC<PropType>= ({setting}) => {
     const {dark}=useGlobalState();
   return (
     <>
@@ -32,8 +40,8 @@ const SettingCard = ({setting}) => {
 
             }}
           >
-            {setting.icon}
-      <p>{setting.name}</p>
+        <setting.icon size={"20px"} style={{ color: "#d1d7db" }} />
+        <p>{setting.name}</p>
     </Box>
     <div className="line" style={{width:"85%"}}/>
 
