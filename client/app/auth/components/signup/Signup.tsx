@@ -45,8 +45,8 @@ const Signup = () => {
   };
   return (
     <Box
-      width={"33%"}
-      height={"100vh"}
+    width={{base:"100%",md:"33%"}}
+    height={"100vh"}
       bg={"#f0f2f5"}
       display={"flex"}
       alignItems={"center"}
