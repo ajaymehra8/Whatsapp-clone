@@ -29,8 +29,10 @@ const MessageInput = () => {
 
 
 const handleMessageChange=(e:React.ChangeEvent<HTMLTextAreaElement>)=>{
+  if(socket){
   setMessage(e.target.value);
   if (!isTyping) {
+   
     socket.emit("typing", selectedChat);
   }
   var timerLength = 1000;
@@ -40,8 +42,10 @@ const handleMessageChange=(e:React.ChangeEvent<HTMLTextAreaElement>)=>{
   typingTimeOut=setTimeout(() => {
       socket.emit("stop_typing", selectedChat);
   }, timerLength);
+}
 };
   const sendMessage = async () => {
+    if(socket){
     try {
       if(!selectedChat) return;
       const { data } = await doMessage(selectedChat?._id, message);
@@ -93,6 +97,7 @@ const handleMessageChange=(e:React.ChangeEvent<HTMLTextAreaElement>)=>{
     } finally {
       setMessage("");
     }
+  }
   };
 
   return (

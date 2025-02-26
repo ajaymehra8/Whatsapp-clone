@@ -38,6 +38,7 @@ const ChatCard = ({ chat }: { chat: any }) => {
 
   const setChat = async (id:string) => {
     try {
+      if(socket){
       const { data } = await chats(id);
       if (data.success) {
         socket.emit("join_chat", data.chat?._id); // Emit event to server
@@ -52,6 +53,7 @@ const ChatCard = ({ chat }: { chat: any }) => {
         setSelectedChat(data.chat);
 
       }
+    }
     } catch (err) {
       if (err instanceof AxiosError)
         toaster.create({
