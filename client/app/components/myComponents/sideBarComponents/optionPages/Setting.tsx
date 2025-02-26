@@ -130,6 +130,7 @@ const Setting = () => {
               background: dark ? "#202c33" : "#f0f2f5",
             }}
             onClick={() => {
+              if(socket)
               socket.disconnect();
 
               localStorage.removeItem("token");
