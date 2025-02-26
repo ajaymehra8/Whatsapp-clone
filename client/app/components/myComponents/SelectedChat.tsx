@@ -21,11 +21,13 @@ const SelectedChat:React.FC<selectedChatProps> = ({messages,setMessages}) => {
   }, [fetchMessages]);
 
  useEffect(()=>{
+  if(socket){
   const handleTyping=(chat:ChatType)=>{
     console.log(chat);
     setIsTyping(true)
     
   };
+
       socket.on("typing",handleTyping);
       socket.on("stop_typing",(chat:ChatType)=>setIsTyping(false));
 
@@ -33,7 +35,7 @@ const SelectedChat:React.FC<selectedChatProps> = ({messages,setMessages}) => {
         socket.off("typing",handleTyping);
         socket.off("stop_typing",(chat:ChatType)=>setIsTyping(false));
       }
-
+    }
  },[])
   return (
     <Box
