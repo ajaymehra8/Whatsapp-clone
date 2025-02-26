@@ -112,7 +112,7 @@ export const getChat = catchAsync(
     if (!chat) {
       const newChat: IUser | null = await User.findById(selectedUserId);
       chatToSend.name = newChat?.name;
-      chatToSend.image = newChat?.image;
+      chatToSend.image = newChat?.image?.link;
       chatToSend._id=newChat?._id;
       chatToSend.messages = [];
       chatToSend.lastSeen=newChat?.lastSeen||"";
@@ -128,7 +128,7 @@ export const getChat = catchAsync(
       const users = chat.users as IUser[]; // Assert that users are populated
       const otherUser = users[0]._id.equals(userId) ? users[1] : users[0];
       chatToSend.name = otherUser.name;
-      chatToSend.image = otherUser.image;
+      chatToSend.image = otherUser.image?.link;
       // chat.name = otherUser?.name;
       chatToSend.userId = otherUser._id;
       chatToSend._id = chat._id;
@@ -154,7 +154,7 @@ export const notifyUser=catchAsync(async(req:MyRequest,res:Response,next:NextFun
   const id=new mongoose.Types.ObjectId(chatId);
  let chat:IChat|null= await Chat.findById(id);
 if(!chat){
-  next(new AppError(400,"Not found any chat"));
+  res.json("");
   return;
 }
 
@@ -173,5 +173,5 @@ chat=await Chat.findByIdAndUpdate(id,{count:newCount},{new:true})
     success:true,
     message:"Increase chat successfully",
     
-  })
+  });
 })

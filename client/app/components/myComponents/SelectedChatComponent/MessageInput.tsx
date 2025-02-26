@@ -2,7 +2,7 @@
 import { Box, Flex } from "@chakra-ui/react";
 import { IoSendSharp } from "react-icons/io5";
 import { IoIosAdd } from "react-icons/io";
-import { useState } from "react";
+import { useState,useEffect,useRef } from "react";
 import { useGlobalState } from "@/app/context/GlobalProvider";
 import { doMessage, notifyUser } from "@/app/utils/api";
 import { toaster } from "../../ui/toaster";
@@ -14,6 +14,20 @@ const MessageInput = () => {
   const [message, setMessage] = useState<string>("");
   const { dark, selectedChat, socket, setChats, onlineUsers,setSelectedChat,isTyping,setIsTyping } =
     useGlobalState();
+    // const textareaRef = useRef<HTMLTextAreaElement>(null);
+    // const mainBoxRef = useRef<HTMLDivElement>(null);
+
+    // useEffect(() => {
+    //   if (textareaRef.current) {
+    //     textareaRef.current.style.height = "5.4vh"; // Reset height
+    //     textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`; // Adjust to content
+    //     if(mainBoxRef.current)
+    //     mainBoxRef.current.style.height = `${textareaRef.current.scrollHeight+10}px`; // Adjust to content
+
+    //   }
+    // }, [message]);
+
+
 const handleMessageChange=(e:React.ChangeEvent<HTMLTextAreaElement>)=>{
   setMessage(e.target.value);
   if (!isTyping) {
@@ -30,12 +44,12 @@ const handleMessageChange=(e:React.ChangeEvent<HTMLTextAreaElement>)=>{
   const sendMessage = async () => {
     try {
       if(!selectedChat) return;
-      const { data } = await doMessage(selectedChat._id, message);
+      const { data } = await doMessage(selectedChat?._id, message);
       
       if(data.newChat){
         setSelectedChat(data.chat);
         socket.emit("new_chat",data.chat);
-        socket.emit("join_chat", data.chat._id); // Emit event to server
+        socket.emit("join_chat", data.chat?._id); // Emit event to server
 
       }else{
       setSelectedChat((prevChat:ChatType|null)=>(
@@ -45,17 +59,28 @@ const handleMessageChange=(e:React.ChangeEvent<HTMLTextAreaElement>)=>{
       socket.emit("send_message", data.newMessage);
       if(selectedChat){
       if (!onlineUsers.includes(selectedChat.userId)) {
-        await notifyUser(selectedChat._id);
+        await notifyUser(selectedChat?._id);
       }
     }
       // want to change from here
-      setChats((prevChats) =>
-        prevChats.map((chat) =>
-          chat._id === selectedChat._id
-            ? { ...chat, topMessage: data.newMessage }
-            : chat
-        )
-      );
+      setChats((prevChats: ChatType[]) => {
+        if (!selectedChat) return prevChats; // Ensure selectedChat is defined
+      
+        // Update the chat with new topMessage
+        const updatedChats = prevChats.map((chat) =>
+          chat._id === selectedChat._id ? { ...chat, topMessage: data.newMessage } : chat
+        );
+      
+        // Find the updated chat
+        const updatedChat = updatedChats.find((chat) => chat._id === selectedChat._id);
+      
+        // Move updated chat to the front if found
+        return updatedChat
+          ? [updatedChat, ...updatedChats.filter((chat) => chat._id !== selectedChat._id)]
+          : updatedChats;
+      });
+      
+      
     } catch (err) {
       console.log(err);
       if (err instanceof AxiosError) {
@@ -72,12 +97,14 @@ const handleMessageChange=(e:React.ChangeEvent<HTMLTextAreaElement>)=>{
 
   return (
     <Flex
-      height={"8vh"}
+      minHeight={"8vh"}
+      maxHeight={'24vh'}
       background={dark ? "#202c33" : "#f0f2f5"}
       width={"100%"}
       justifyContent={"center"}
       alignItems={"center"}
       gap={3}
+      
     >
       <IoIosAdd
         size={"30px"}
@@ -91,11 +118,13 @@ const handleMessageChange=(e:React.ChangeEvent<HTMLTextAreaElement>)=>{
           padding: "5px 10px",
           borderRadius: "10px",
           backgroundColor: dark ? "#2a3942" : "#ffffff",
-          height: "75%",
+          maxHeight:'20vh',
+          height:'5.4vh',
           overflowY: "auto",
           overflowX: "hidden", // Prevent horizontal scrolling
           resize: "none", // Prevent resizing if needed
         }}
+
         value={message}
         onChange={handleMessageChange}
         onKeyDown={(e) => {

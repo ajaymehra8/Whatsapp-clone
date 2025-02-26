@@ -9,6 +9,9 @@ const ChatCard = ({ chat }: { chat: any }) => {
   const { selectedChat, setSelectedChat,setChats,user,isTyping } = useGlobalState();
   const { dark, socket } = useGlobalState();
   function formatTimestamp(timestamp: Date | string | number): string {
+    if(!timestamp){
+      return "";
+    }
     const date: Date = new Date(timestamp);
     const now: Date = new Date();
     
@@ -37,10 +40,10 @@ const ChatCard = ({ chat }: { chat: any }) => {
     try {
       const { data } = await chats(id);
       if (data.success) {
-        socket.emit("join_chat", data.chat._id); // Emit event to server
+        socket.emit("join_chat", data.chat?._id); // Emit event to server
         setChats((prevChats) =>
           prevChats.map((chat) =>
-            chat._id === id
+            chat?._id === id
               ? { ...chat, count:0}
               : chat
           )

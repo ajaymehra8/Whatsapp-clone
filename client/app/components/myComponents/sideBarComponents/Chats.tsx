@@ -3,7 +3,7 @@ import { Box, Button } from "@chakra-ui/react";
 import { MdOutlineAddComment } from "react-icons/md";
 import { SlOptionsVertical } from "react-icons/sl";
 import SearchBar from "./SearchBar";
-import { useEffect, useState } from "react";
+import { useEffect, useState,useRef } from "react";
 import ChatCard from "./chatComponents/ChatCard";
 import { useGlobalState } from "@/app/context/GlobalProvider";
 import { getAllChats } from "@/app/utils/api";
@@ -12,6 +12,7 @@ import { toaster } from "../../ui/toaster";
 import { createChat } from "./utils/createChat";
 import { useCallback } from "react";
 import socket from "@/lib/socket";
+import BottomOptions from "./chatComponents/BottomOptions";
 // types
 interface ChatType {
   _id: string;
@@ -22,18 +23,33 @@ interface ChatType {
 const Chats = () => {
   const [active, setActive] = useState("All");
   const { user, dark,fetchAgain,chats,setChats } = useGlobalState();
-  const buttons = ["All", "Unread", "Favorites", "Groups"];
+  const buttons = ["All", "Unread", "Groups"];
+  const divRef = useRef<HTMLDivElement | null>(null);
+  const [height, setHeight] = useState<number>(0);
+  const [noItemText, setNoItemText] = useState("No chats,yet.");
+
+  useEffect(() => {
+    if (!divRef.current) return;
+
+    // ResizeObserver to track height changes
+    const observer = new ResizeObserver(([entry]) => {
+      setHeight(entry.contentRect.height);
+    });
+
+    observer.observe(divRef.current);
+
+    return () => observer.disconnect(); // Cleanup on unmount
+  }, []);
  
-  const [noItemText, setNoItemText] = useState("No chats,yet");
 
 
   const fetchChats = useCallback(async () => {
     
-    if (user)
+    if (user && chats.length<1)
       try {
         const { data } = await getAllChats();
         
-        const chats = createChat(data.chats, user._id);
+        const chats = createChat(data.chats, user?._id);
         setChats(chats);
       } catch (err) {
         if (err instanceof AxiosError) {
@@ -59,19 +75,20 @@ const Chats = () => {
         position={"fixed"}
         top={"0"}
         width={{base:"100%",md:"30%"}}
-        minH={"20vh"}
-        paddingTop={"14px"}
+        minH={"17vh"}
+        paddingTop={"15px"}
         zIndex={2}
         bg={dark ? "#111b21" : "#ffffff"}
         overflow={"hidden"}
+        ref={divRef}
       >
         <Box
           display={"flex"}
           justifyContent={"space-between"}
           width={"100%"}
-          padding={"0 10px"}
+          padding={"0 15px"}
         >
-          <h3 style={{ fontSize: "20px", fontWeight: 700 }}>Chats</h3>
+          <h3 style={{ fontSize: "22px", fontWeight: 700,fontFamily:"'Fira Sans',sans-serif" }}>Chats</h3>
           <Box
             display={"flex"}
             justifyContent={"space-between"}
@@ -119,7 +136,7 @@ const Chats = () => {
         width={"100%"}
         display={"flex"}
         flexDirection={"column"}
-        marginTop={{base:"23vh",md:"25vh"}}
+        marginTop={height+25+"px"}
         height={"75vh"}
         overflowY={"auto"}
         bg={dark ? "#111b21" : ""}
@@ -144,6 +161,7 @@ const Chats = () => {
           <h1 className="no-item-text">{noItemText}</h1>
         )}
       </Box>
+      <BottomOptions/>
     </Box>
   );
 };

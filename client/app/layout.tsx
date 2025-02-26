@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono,Fira_Sans } from "next/font/google";
 import {Provider} from "./components/ui/provider";
 import { GlobalProvider } from "./context/GlobalProvider";
 import {
@@ -13,7 +13,12 @@ const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
+const firaSans = Fira_Sans({
+  variable: "--font-fira-sans",
+  subsets: ["latin"],
+  weight: ["100","200","300","400","500","600","700","900"], // Adjust as needed (e.g., "300", "500", "700")
 
+});
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
@@ -31,7 +36,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${firaSans.variable}`} suppressHydrationWarning>
       <GlobalProvider>
 
        <Provider>

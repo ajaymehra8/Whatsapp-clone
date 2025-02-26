@@ -6,7 +6,7 @@ import { chatBoxProps, Message } from "@/app/types/allTypes";
 
 const ChatBox:React.FC<chatBoxProps> = ({ messages, boxRef}) => {
   const { dark, user } = useGlobalState();
-  const myId = user._id;
+  const myId = user?._id;
   useEffect(() => {
     if (boxRef.current) {
       boxRef.current.scrollTop = boxRef.current.scrollHeight;

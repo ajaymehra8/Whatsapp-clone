@@ -4,12 +4,12 @@ export const createChat = (chats: any, userId: string) => {
     }
   return (chats.map((chat:any) => {
     let otherUser =
-      chat.users[0]._id === userId ? chat.users[1] : chat.users[0];
+      chat.users[0]?._id === userId ? chat.users[1] : chat.users[0];
     return {
-      _id:chat._id,
-      userId:otherUser._id,
+      _id:chat?._id,
+      userId:otherUser?._id,
       name: otherUser.name,
-      image: otherUser.image,
+      image: otherUser.image.link,
       topMessage: chat.topMessage,
       lastSeen:chat.lastSeen||"not",
       count:chat.count||0

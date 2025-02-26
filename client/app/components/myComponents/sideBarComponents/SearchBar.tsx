@@ -33,7 +33,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ setChats, setNoItemText }) => {
       setNoItemText("");
       if (data.success) {
 
-        const oneToOneChats = createChat(data.oneToOneChats, user._id);
+        const oneToOneChats = createChat(data.oneToOneChats, user?._id);
         setChats([...oneToOneChats,...data.users]);
       }
     } catch (err) {
