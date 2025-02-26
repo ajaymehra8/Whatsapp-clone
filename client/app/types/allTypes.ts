@@ -30,3 +30,6 @@ export interface ChatType {
   messages:Message[];
   image?:string
 }
+export interface UserType{
+  
+}

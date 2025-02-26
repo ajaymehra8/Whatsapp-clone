@@ -12,7 +12,7 @@ import { useRouter, usePathname } from "next/navigation";
 
 import { useGlobalState } from "@/app/context/GlobalProvider";
 const Signup = () => {
-  const {setUser,setToken,token}=useGlobalState();
+  const {setUser,setToken}=useGlobalState();
 
   const handleSubmit=async (values:any, actions:any) => {
     try {
@@ -21,7 +21,8 @@ const Signup = () => {
       setToken(data?.jwt);
       localStorage.setItem("user",JSON.stringify(data.user));
       localStorage.setItem("token",data.jwt);
-
+      // const tempSocket = getSocket(user);
+      // setSocket(tempSocket);
       toaster.create({
         title: data.message,
         description:"Enjoy",

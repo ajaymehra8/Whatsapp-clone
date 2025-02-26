@@ -31,6 +31,8 @@ interface GlobalContextType {
   setChats: React.Dispatch<React.SetStateAction<ChatType[]>>;
   isTyping: boolean;
   setIsTyping: React.Dispatch<React.SetStateAction<boolean>>;
+option:string;
+setOption:   React.Dispatch<React.SetStateAction<string>>;
 }
 
 // Create context with a default value
@@ -39,7 +41,7 @@ const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
 // Provider component
 export const GlobalProvider = ({ children }: { children: ReactNode }) => {
   const [selectedChat, setSelectedChat] = useState<ChatType | null>(null); // Example global state
- 
+ const [option,setOption]=useState<string>("chats");
   const [chats, setChats] = useState<ChatType[]>([]);
   const [dark, setDark] = useState<boolean>(false);
 
@@ -50,7 +52,6 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
   }, []);
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const [user, setUser] = useState<any>(null);
-  const [online, setOnline] = useState<boolean>(false);
   const [token, setToken] = useState<any>(null);
   const [fetchAgain, setFetchAgain] = useState<boolean>(false);
   const [isTyping, setIsTyping] = useState<boolean>(false);
@@ -95,6 +96,8 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
   // Emit "setup" event when the user is available and socket is ready
   useEffect(() => {
     if (user && socket) {
+      if(!socket.connected)
+      socket.connect();
       socket.emit("setup", user);
       const handleOnlineUsers = (users: string[]) => {
         setOnlineUsers(users);
@@ -148,6 +151,8 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
         setChats,
         isTyping,
         setIsTyping,
+        option,
+        setOption
       }}
     >
       {children}

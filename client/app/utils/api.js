@@ -19,14 +19,15 @@ API.interceptors.request.use((config) => {
 // Auth API calls
 export const login = (data) => API.post("/auth/login", data);
 export const signup = (data) => API.post("/auth/signup", data);
-export const logout = () => {
-  localStorage.removeItem("token");
-  window.location.reload();
-};
+
 
 //user api calls
 export const users=(search)=>API.get(`/user?search=${search}`);
-
+export const updateUser=(formData)=> API.patch(`/user/update-profile`, formData, {
+  headers: {
+    "Content-Type": "multipart/form-data", // Ensure correct content type for file upload
+  },
+});
 //chat api calls
 export const chats=(id)=>API.get(`/chat/${id}`);
 export const getAllChats=()=>API.get(`/chat`);

@@ -46,13 +46,13 @@ if(!selectedChat){
 }
   return (
     <Box
-      h={"10vh"}
+      height={'10vh'}
       background={dark ? "#202c33" : "#f0f2f5"}
       display={"flex"}
       justifyContent={"space-between"}
       alignItems={"center"}
-      padding={"5px 25px 5px 15px"}
-      w={"100%"}
+      padding={"10px 25px 10px 15px"}
+      width={{ base: "100%", md: "65%" }}
       top={0}
       position={"fixed"}
       zIndex={10}

@@ -5,7 +5,7 @@ import FlexLayout from "./auth/components/FlexLayout";
 import SideBar from "./components/myComponents/SideBar";
 import SelectedChat from "./components/myComponents/SelectedChat";
 import { useCallback, useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname,redirect } from "next/navigation";
 import { useGlobalState } from "./context/GlobalProvider";
 import { SlControlPause } from "react-icons/sl";
 import { notifyUser } from "./utils/api";
@@ -40,19 +40,25 @@ export default function Home() {
           prevChats.map((chat) => {
             const newCount = chat.count + 1;
 
-            return chat._id === newMessage.chat._id
+            return chat?._id === newMessage?.chat?._id
               ? { ...chat, count: newCount }
               : chat;
           })
         );
       }
-      setChats((prevChats) =>
-        prevChats.map((chat) =>
-          chat._id === newMessage.chat._id
+      setChats((prevChats) => {
+        const updatedChats = prevChats.map((chat) =>
+          chat?._id === newMessage.chat?._id
             ? { ...chat, topMessage: newMessage }
             : chat
-        )
-      );
+        );
+      
+        // Move the updated chat to the front
+        return [
+          updatedChats.find((chat) => chat?._id === newMessage.chat?._id),
+          ...updatedChats.filter((chat) => chat?._id !== newMessage.chat?._id),
+        ];
+      });
     },
     [selectedChat, socket]
   );
@@ -69,7 +75,7 @@ export default function Home() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      router.replace("/auth/login");
+      redirect("/auth/login");
     } else if (pathname === "/auth/login" || pathname === "/auth/signup") {
       router.replace("/");
     }

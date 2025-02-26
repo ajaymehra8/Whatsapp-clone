@@ -9,37 +9,37 @@ import { toaster } from "@/app/components/ui/toaster";
 import { AxiosError } from "axios";
 import { login } from "@/app/utils/api";
 import { useGlobalState } from "@/app/context/GlobalProvider";
+import getSocket from "@/lib/socket";
 const Login = () => {
-  const {setUser,setToken,token}=useGlobalState();
-  
-    const handleSubmit=async (values:any, actions:any) => {
-      try {
-        const { data } = await login(values);
-        setUser(data?.user);
-        setToken(data?.jwt);
-        localStorage.setItem("user",JSON.stringify(data.user));
-        localStorage.setItem("token",data.jwt);
-  
-        toaster.create({
-          title: data.message,
-          description:"Enjoy",
-          type:"success"
-        });
-        actions.resetForm();
-        
-      } catch (err) {
-        
-        if(err instanceof AxiosError)
+  const { setUser, setToken} = useGlobalState();
+
+  const handleSubmit = async (values: any, actions: any) => {
+    try {
+      const { data } = await login(values);
+      setUser(data?.user);
+      setToken(data?.jwt);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("token", data.jwt);
+      // const tempSocket = getSocket(user);
+      // setSocket(tempSocket);
+      toaster.create({
+        title: data.message,
+        description: "Enjoy",
+        type: "success",
+      });
+      actions.resetForm();
+    } catch (err) {
+      if (err instanceof AxiosError)
         toaster.create({
           title: err?.response?.data.message || "Error in login",
-          description:"Try again",
-          type:"error"
+          description: "Try again",
+          type: "error",
         });
-        console.log(err);
-      } finally {
-        actions.setSubmitting(false);
-      }
-    };
+      console.log(err);
+    } finally {
+      actions.setSubmitting(false);
+    }
+  };
   return (
     <Box
       width={"33%"}
@@ -58,22 +58,29 @@ const Login = () => {
         minH={"400px"}
       >
         <Box mb={"50px"}>
-        <Text
-          textAlign="left"
-          color={"black"}
-          fontSize={"25px"}
-          fontWeight={400}
-          letterSpacing={"1px"}
-        >
-          Login to your account
-        </Text>
-        <p style={{ color: "black", letterSpacing: "1px", fontSize: "15px",fontWeight:600 }}>
-          Not have account{" "}
-          <Link href={"/auth/signup"} style={{ color: "blue" }}>
-            Create One
-          </Link>
-          ?{" "}
-        </p>
+          <Text
+            textAlign="left"
+            color={"black"}
+            fontSize={"25px"}
+            fontWeight={400}
+            letterSpacing={"1px"}
+          >
+            Login to your account
+          </Text>
+          <p
+            style={{
+              color: "black",
+              letterSpacing: "1px",
+              fontSize: "15px",
+              fontWeight: 600,
+            }}
+          >
+            Not have account{" "}
+            <Link href={"/auth/signup"} style={{ color: "blue" }}>
+              Create One
+            </Link>
+            ?{" "}
+          </p>
         </Box>
         <Formik
           initialValues={{ email: "", password: "" }}
