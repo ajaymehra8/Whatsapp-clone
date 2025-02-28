@@ -1,5 +1,5 @@
 import { Server, Socket } from "socket.io";
-import User from "../model/userModel";
+import User, { IUser } from "../model/userModel";
 import mongoose from "mongoose";
 
 const users: Map<string, string> = new Map();
@@ -46,15 +46,15 @@ const socketHandler = (io: Server) => {
 // HANDLE NEW CHAT
 socket.on(
   "new_chat",
-  (chat: {users: string[], sender: string  }) => {
+  (chat: {users: IUser[], sender: string  }) => {
 const sender=chat.sender;
     if (!chat.users || !Array.isArray(chat.users)) {
       return console.error("chat.users is not defined or not an array");
     }
 
-    chat.users.forEach((userId: string) => {
-      if (userId !== sender) {
-        const receiverSocketId = users.get(userId);
+    chat.users.forEach((user: IUser) => {
+      if (user._id.toString() !== sender) {
+        const receiverSocketId = users.get(user._id.toString());
         if (receiverSocketId) {
           io.to(receiverSocketId).emit("new_chat", chat);
         }
