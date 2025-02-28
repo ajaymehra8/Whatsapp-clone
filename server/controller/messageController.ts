@@ -66,6 +66,8 @@ export const doMessage = catchAsync(
           ? chat.users[1] as IUser
           : chat.users[0] as IUser;
       const deletedForOtherUser = chat.deletedFor?.includes(otherUser._id);
+      await Chat.findByIdAndUpdate(chat?._id,{deletedFor:[]});
+
       if (deletedForOtherUser) {
         console.log("working");
         newChat = true;
@@ -79,7 +81,6 @@ export const doMessage = catchAsync(
         chatToSend.userId = otherUser._id;
 
         chatToSend.users = chat?.users;
-        await Chat.findByIdAndUpdate(chat?._id,{deletedFor:[]});
       }
     }
     let message: IMessage | null = await Message.create({

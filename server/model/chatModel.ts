@@ -11,6 +11,7 @@ export interface IChat extends Document {
   users: (mongoose.Types.ObjectId | IUser)[]; // Allow both ObjectId & User document
   count:number;
   deletedFor?: (mongoose.Types.ObjectId | IUser)[];
+  pinnedBy?:(mongoose.Types.ObjectId | IUser)[];
 }
 
 const chatSchema: Schema<IChat> = new mongoose.Schema<IChat>(
@@ -48,6 +49,11 @@ const chatSchema: Schema<IChat> = new mongoose.Schema<IChat>(
  { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
    
     ],
+    pinnedBy: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+        
+         ],
+
   },
   { timestamps: true }
 );
