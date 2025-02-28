@@ -57,8 +57,7 @@ export const getAllChats = catchAsync(
           path: "users",
         },
         { path: "topMessage", select: "content createdAt sender" },
-      ])
-      .sort({ updatedAt: -1 });
+      ]);
     if (!chats) {
       res.status(200).json({
         success: true,
@@ -74,7 +73,21 @@ export const getAllChats = catchAsync(
       }
       return chat;
     });
-
+    chats.sort((a, b) => {
+      const aPinned = a.pinnedBy?.includes(userId) ?? false; // Ensuring a boolean value
+      const bPinned = b.pinnedBy?.includes(userId) ?? false; // Ensuring a boolean value
+    
+      if (aPinned && !bPinned) return -1; // 'a' comes first if only 'a' is pinned
+      if (!aPinned && bPinned) return 1;  // 'b' comes first if only 'b' is pinned
+    
+      return 0; // Maintain original order if both are pinned or both are not
+    });
+    chats = chats.map((chat) => {
+      if (chat.pinnedBy?.includes(userId)) {
+        return { ...chat.toObject(), isPinned:true }; // Convert to plain object before modifying
+      }
+      return chat;
+    });
     res.status(200).json({
       success: true,
       message: "Chats fetched successfully",
@@ -230,3 +243,48 @@ export const deleteChat = catchAsync(
     });
   }
 );
+
+// PIN CHAT
+export const pinChat=catchAsync(async(req:MyRequest,res:Response,next:NextFunction)=>{
+  let userId=req.user?.id;
+  let chatId=req.body?.chatId;
+  if(!chatId){
+    next(new AppError(400,"No chat provided."));
+    return;
+  }
+  userId=new mongoose.Types.ObjectId(userId);
+chatId=new mongoose.Types.ObjectId(chatId);
+const chat:IChat|null=await Chat.findByIdAndUpdate(chatId,{$push:{pinnedBy:userId}},{new:true});
+if(!chat){
+next(new AppError(404,"No chat found"));
+return;
+}
+res.status(200).json({
+  success:true,
+  message:"Chat pinned",
+  chat
+});
+});
+
+// UNPIN CHAT
+export const unpinChat=catchAsync(async(req:MyRequest,res:Response,next:NextFunction)=>{
+  let userId=req.user?.id;
+  let chatId=req.body?.chatId;
+  if(!chatId){
+    next(new AppError(400,"No chat provided."));
+    return;
+  }
+  userId=new mongoose.Types.ObjectId(userId);
+chatId=new mongoose.Types.ObjectId(chatId);
+const chat:IChat|null=await Chat.findByIdAndUpdate(chatId,{$pull:{pinnedBy:userId}},{new:true});
+console.log(chat,"unpinned");
+if(!chat){
+next(new AppError(404,"No chat found"));
+return;
+}
+res.status(200).json({
+  success:true,
+  message:"Chat unpinned",
+  chat
+});
+})
