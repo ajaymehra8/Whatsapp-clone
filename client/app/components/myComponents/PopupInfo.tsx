@@ -41,7 +41,7 @@ const PopupInfo = () => {
 
   return (
     <Box
-      width={"clamp(200px,40vw,600px)"}
+      width={"clamp(300px,40vw,600px)"}
       display={"flex"}
       flexDirection={"column"}
       padding={"15px 30px"}

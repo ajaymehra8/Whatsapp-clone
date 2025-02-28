@@ -24,7 +24,11 @@ boxRef: MutableRefObject<HTMLDivElement | null>;  // ✅ Correctly type boxRef
 export interface ChatType {
   _id: string;
   name: string;
-  latestMessage?: string;
+  topMessage:{
+    sender:string,
+    content:string,
+    createdAt:Date
+  };
   userId: string;
   count: number;
   lastSeen?: Date | string;
@@ -32,7 +36,8 @@ export interface ChatType {
   image?:{
     name:string,
     link:string,
-  }
+  };
+  isPinned:boolean
 }
 export interface UserType{
   name:string,

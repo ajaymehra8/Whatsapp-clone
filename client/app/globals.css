@@ -321,12 +321,17 @@ transform: scale(1);  }
 }
 
 /* POPUP STYLE END */
-
+.downIcon{
+  display: none;
+}
 @media (width<770px) {
   .backBtn {
     display: inherit;
   }
   .line {
     display: none;
+  }
+  .downIcon{
+    display: inherit!important;
   }
 }
