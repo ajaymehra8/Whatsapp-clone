@@ -9,41 +9,39 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 import { Tooltip } from "../../ui/tooltip";
 
 const ChatHead = () => {
-  const { selectedChat, dark, onlineUsers,setSelectedChat,isTyping } = useGlobalState();
-  function formatTimestamp(timestamp: Date | string | number|undefined): string {
-    if(!timestamp){
+  const { selectedChat, dark, onlineUsers, setSelectedChat, isTyping, setOtherUserId, otherUserId } = useGlobalState();
+  function formatTimestamp(timestamp: Date | string | number | undefined): string {
+    if (!timestamp) {
       return "";
     }
     const date: Date = new Date(timestamp);
     const now: Date = new Date();
-    
-    const diffMs: number = now.getTime() - date.getTime(); // Ensure number type
+  
+    const diffMs: number = now.getTime() - date.getTime();
     const diffHours: number = diffMs / (1000 * 60 * 60);
-
-    if (diffHours < 24) {
-        // Format time like 2:30 PM or 2:00 AM
-        return date.toLocaleTimeString("en-US", {
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true
-        });
-    } else if (diffHours < 48) {
-        return "Yesterday";
+  
+    const formattedTime = date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true
+    });
+  
+    if (diffHours < 24 && date.getDate() === now.getDate()) {
+      return `at ${formattedTime}`; // Same day, return time only
+    } else if (diffHours < 48 && date.getDate() === now.getDate() - 1) {
+      return `yesterday at ${formattedTime}`; // Show "Yesterday + time"
     } else {
-        // Format as "2-Feb"
-        return date.toLocaleDateString("en-GB", {
-            day: "numeric",
-            month: "short"
-        });
+      return `${now.getDate()-date.getDate()} days ago`// Older dates include time
     }
-}
+  }
+  
 
-const handleBackClick=()=>{
-  setSelectedChat(null);
-};
-if(!selectedChat){
-  return null;
-}
+  const handleBackClick = () => {
+    setSelectedChat(null);
+  };
+  if (!selectedChat) {
+    return null;
+  }
   return (
     <Box
       height={'10vh'}
@@ -52,8 +50,9 @@ if(!selectedChat){
       justifyContent={"space-between"}
       alignItems={"center"}
       padding={"10px 25px 10px 15px"}
-      width={{ base: "100%", md: "65%" }}
+      width={{ base: "100%", md: otherUserId ? "35%" : "65%" }}
       top={0}
+      cursor={'pointer'}
       position={"fixed"}
       zIndex={10}
     >
@@ -64,18 +63,20 @@ if(!selectedChat){
         gap={"13px"}
         cursor={"pointer"}
       >
-<IoMdArrowRoundBack size={"25px"} className="backBtn" onClick={handleBackClick}/>
+        <IoMdArrowRoundBack size={"25px"} className="backBtn" onClick={handleBackClick} />
 
-        <Avatar.Root size={"sm"} bg={"blue"}>
+        <Avatar.Root size={"sm"} bg={"blue"} onClick={() => setOtherUserId(selectedChat?.userId)}
+        >
           <Avatar.Fallback name={selectedChat?.name} />
           <Avatar.Image
             src={
-              selectedChat?.image ||
+              selectedChat?.image?.link ||
               "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvodrlyTZzayZIVYMNDeGx_vAKPj8-Br7Z6Q&s"
             }
           />
         </Avatar.Root>
-        <div className="textBox">
+        <div className="textBox" onClick={() => setOtherUserId(selectedChat?.userId)}
+        >
           <p
             style={{
               fontSize: "16px",
@@ -96,9 +97,9 @@ if(!selectedChat){
               marginTop: "-2px",
             }}
           >
-            {onlineUsers.includes(selectedChat?.userId||selectedChat?._id)
-              ? (isTyping?"typing...":"Online")
-              : (isTyping?"typing...":`last seen at ${formatTimestamp(selectedChat?.lastSeen)}`)}{" "}
+            {onlineUsers.includes(selectedChat?.userId || selectedChat?._id)
+              ? (isTyping ? "typing..." : "Online")
+              : (isTyping ? "typing..." : `last seen ${formatTimestamp(selectedChat?.lastSeen)}`)}{" "}
           </p>
         </div>
       </Box>

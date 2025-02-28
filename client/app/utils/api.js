@@ -23,15 +23,18 @@ export const signup = (data) => API.post("/auth/signup", data);
 
 //user api calls
 export const users=(search)=>API.get(`/user?search=${search}`);
+export const getUser=(userId)=>API.get(`/user/${userId}`);
 export const updateUser=(formData)=> API.patch(`/user/update-profile`, formData, {
   headers: {
     "Content-Type": "multipart/form-data", // Ensure correct content type for file upload
   },
 });
+
 //chat api calls
 export const chats=(id)=>API.get(`/chat/${id}`);
 export const getAllChats=()=>API.get(`/chat`);
 export const notifyUser=(chatId)=>API.post('/chat/push-notification',{chatId});
+export const deleteChat=(chatId)=>API.post('/chat/delete-chat',{chatId});
 
 //message api calls
 export const doMessage=(chatId,content)=>API.post(`/message`,{chatId,content});

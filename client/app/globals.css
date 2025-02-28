@@ -248,12 +248,79 @@ a {
   padding: 5px 20px;
   border-radius: 100px;
   cursor: pointer;
-  transition: all .5s;
+  transition: all 0.5s;
 }
-.default-btn:hover{
+.default-btn:hover {
   transform: translateY(5px);
 }
 /* profile section style end */
+
+/* CARD OPTIONS STYLE START */
+
+.option-ul {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.option-ul li {
+  width: 100%;
+  padding: 2px 4px;
+}
+.option-ul li:hover {
+  background: #111b21;
+}
+
+/* CARD OPTIONS STYLE END */
+
+/* POPUP STYLE START */
+.popup-box{
+animation: growup .1s ease-in;
+}
+@keyframes growup{
+  0%{
+  transform: scale(0);
+  }
+  50%{
+transform: scale(.5);
+  }
+  100%{
+transform: scale(1);  }
+}
+.bottom-btns {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5%;
+  align-self: flex-end;
+  width: fit-content;
+  margin-top: auto;
+}
+.bottom-btns button {
+  border: 1px solid #43515c;
+  padding: 5px 20px;
+  box-sizing: border-box;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: all 0.5s;
+  font-size: 15px;
+  font-weight: 500;
+}
+.bottom-btns .confirm-btn {
+  background: #00a884;
+  color: var(--background);
+}
+.bottom-btns .confirm-btn:hover {
+  background: #06cf9c;
+}
+.bottom-btns .cancel-btn {
+  background: none;
+  color: #00a884;
+}
+.bottom-btns .cancel-btn:hover {
+  color: #06cf9c;
+}
+
+/* POPUP STYLE END */
 
 @media (width<770px) {
   .backBtn {

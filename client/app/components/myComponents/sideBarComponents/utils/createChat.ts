@@ -5,14 +5,33 @@ export const createChat = (chats: any, userId: string) => {
   return (chats.map((chat:any) => {
     let otherUser =
       chat.users[0]?._id === userId ? chat.users[1] : chat.users[0];
+      console.log(otherUser);
     return {
       _id:chat?._id,
       userId:otherUser?._id,
       name: otherUser.name,
-      image: otherUser.image.link,
+      image: {name:otherUser.image.name,link:otherUser.image.link},
       topMessage: chat.topMessage,
       lastSeen:chat.lastSeen||"not",
       count:chat.count||0
     };
   }));
+};
+export const createSingleChat= (chat: any, userId: string) => {
+  if(!chat){
+    return {};
+  }
+  let otherUser =
+    chat.users[0]?._id === userId ? chat.users[1] : chat.users[0];
+    console.log(otherUser);
+  return {
+    _id:chat?._id,
+    userId:otherUser?._id,
+    name: otherUser.name,
+    image: {name:otherUser.image.name,link:otherUser.image.link},
+    topMessage: chat.topMessage,
+    lastSeen:chat.lastSeen||"not",
+    count:chat.count||0
+  };
+
 };

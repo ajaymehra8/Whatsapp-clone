@@ -9,6 +9,7 @@ export interface Message {
   content: string;
   createdAt: string; // ISO Date string
   chat:chat;
+  deletedFor?:string[];
 };
   
 export  interface selectedChatProps{
@@ -28,8 +29,18 @@ export interface ChatType {
   count: number;
   lastSeen?: Date | string;
   messages:Message[];
-  image?:string
+  image?:{
+    name:string,
+    link:string,
+  }
 }
 export interface UserType{
-  
+  name:string,
+  email:string,
+  image:{
+    name:string,
+    link:string,
+  },
+  lastSeen?:Date,
+  _id:string
 }
