@@ -35,6 +35,8 @@ export const chats=(id)=>API.get(`/chat/${id}`);
 export const getAllChats=()=>API.get(`/chat`);
 export const notifyUser=(chatId)=>API.post('/chat/push-notification',{chatId});
 export const deleteChat=(chatId)=>API.post('/chat/delete-chat',{chatId});
+export const pinTheChat=(chatId)=>API.post(`/chat/pin-chat`,{chatId});
+export const unpinTheChat=(chatId)=>API.post(`/chat/unpin-chat`,{chatId});
 
 //message api calls
 export const doMessage=(chatId,content)=>API.post(`/message`,{chatId,content});

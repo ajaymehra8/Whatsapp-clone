@@ -7,11 +7,13 @@ import { AxiosError } from "axios";
 import { FaChevronDown } from "react-icons/fa";
 import CardOptions from "./CardOptions";
 import { useState, useRef, useEffect } from "react";
+import { TiPin } from "react-icons/ti";
+import { ChatType } from "@/app/types/allTypes";
 
 const ChatCard = ({ chat }: { chat: any }) => {
   const { selectedChat, setSelectedChat, setChats, user } = useGlobalState();
   const { dark, socket } = useGlobalState();
-  const [openOptionId, setOpenOptionId] = useState<string | null>(null);
+  const [openOptionId, setOpenOptionId] = useState<ChatType | null>(null);
 
   // Close box when clicking outside
   // useEffect(() => {
@@ -40,7 +42,7 @@ const ChatCard = ({ chat }: { chat: any }) => {
       return date.toLocaleTimeString("en-US", {
         hour: "numeric",
         minute: "2-digit",
-        hour12: true
+        hour12: true,
       });
     } else if (diffHours < 48) {
       return "Yesterday";
@@ -48,7 +50,7 @@ const ChatCard = ({ chat }: { chat: any }) => {
       // Format as "2-Feb"
       return date.toLocaleDateString("en-GB", {
         day: "numeric",
-        month: "short"
+        month: "short",
       });
     }
   }
@@ -61,14 +63,11 @@ const ChatCard = ({ chat }: { chat: any }) => {
           socket.emit("join_chat", data.chat?._id); // Emit event to server
           setChats((prevChats) =>
             prevChats.map((chat) =>
-              chat?._id === id
-                ? { ...chat, count: 0 }
-                : chat
+              chat?._id === id ? { ...chat, count: 0 } : chat
             )
           );
           console.log(data.chat);
           setSelectedChat(data.chat);
-
         }
       }
     } catch (err) {
@@ -81,9 +80,9 @@ const ChatCard = ({ chat }: { chat: any }) => {
     }
   };
 
-  const toggleOptions = (e:React.MouseEvent<HTMLOrSVGElement>) => {
+  const toggleOptions = (e: React.MouseEvent<HTMLOrSVGElement>) => {
     e?.stopPropagation();
-    setOpenOptionId(prev => (prev === chat._id ? null : chat._id)); // Toggle only one card
+    setOpenOptionId((prev) => (prev?._id === chat._id ? null : chat)); // Toggle only one card
   };
 
   return (
@@ -97,27 +96,31 @@ const ChatCard = ({ chat }: { chat: any }) => {
         alignItems={"center"}
         gap={"20px"}
         cursor={"pointer"}
-        position={'relative'}
+        position={"relative"}
         background={
           dark
             ? selectedChat?._id === chat?._id
               ? "#2a3942"
               : "#111b21"
             : selectedChat?._id === chat?._id
-              ? "#f0f2f5"
-              : "#ffffff"
+            ? "#f0f2f5"
+            : "#ffffff"
         }
         _hover={{
           background:
             selectedChat?._id === chat?._id ? "" : dark ? "#202c33" : "#f0f2f5",
           "& .chatCardCorner .downIcon": { display: "inherit!important" },
-
         }}
         onClick={() => {
           setChat(chat?._id);
         }}
       >
-               {openOptionId === chat?._id && <CardOptions setOpenOptionId={setOpenOptionId} openOptionId={openOptionId}/>}
+        {openOptionId?._id === chat?._id && (
+          <CardOptions
+            setOpenOptionId={setOpenOptionId}
+            openOptionId={openOptionId}
+          />
+        )}
 
         <Avatar.Root size={"lg"}>
           <Avatar.Fallback name={chat?.name} />
@@ -134,7 +137,7 @@ const ChatCard = ({ chat }: { chat: any }) => {
           >
             {chat?.name}
           </p>
-          {(chat?.topMessage?.content) ? (
+          {chat?.topMessage?.content ? (
             <p
               style={{
                 fontSize: "12px",
@@ -146,14 +149,27 @@ const ChatCard = ({ chat }: { chat: any }) => {
             >
               {chat?.topMessage?.content}
             </p>
-          ) : ""}
+          ) : (
+            ""
+          )}
         </div>
         <div className="chatCardCorner">
           <div>
-            <p className="cardTime" style={{ color: "#c0c9ce" }}>{formatTimestamp(chat?.topMessage?.createdAt)}</p>
+            <p className="cardTime" style={{ color: "#c0c9ce" }}>
+              {formatTimestamp(chat?.topMessage?.createdAt)}
+            </p>
           </div>
-          <div style={{ display: "flex", gap: "5px", justifyContent: "center", alignItems: "center" }}>
-            {(chat?.count > 0 && chat?.topMessage?.sender !== user?._id) && (
+          <div
+            style={{
+              display: "flex",
+              gap: "5px",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            {chat?.isPinned && <TiPin color="#aebac1" size={'20px'}/>}
+
+            {chat?.count > 0 && chat?.topMessage?.sender !== user?._id && (
               <>
                 <div className="notification">
                   <p>{chat.count} </p>
@@ -161,7 +177,13 @@ const ChatCard = ({ chat }: { chat: any }) => {
               </>
             )}
 
-            <FaChevronDown color="#aebac1" style={{ display: "none" }} className="downIcon" onClick={toggleOptions} />
+            {chat?.topMessage && (
+              <FaChevronDown
+                color="#aebac1"
+                className="downIcon"
+                onClick={toggleOptions}
+              />
+            )}
           </div>
         </div>
       </Box>

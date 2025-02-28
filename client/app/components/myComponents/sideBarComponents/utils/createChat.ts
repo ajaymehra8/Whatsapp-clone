@@ -5,7 +5,7 @@ export const createChat = (chats: any, userId: string) => {
   return (chats.map((chat:any) => {
     let otherUser =
       chat.users[0]?._id === userId ? chat.users[1] : chat.users[0];
-      console.log(otherUser);
+      console.log(chat?.isPinned);
     return {
       _id:chat?._id,
       userId:otherUser?._id,
@@ -13,7 +13,8 @@ export const createChat = (chats: any, userId: string) => {
       image: {name:otherUser.image.name,link:otherUser.image.link},
       topMessage: chat.topMessage,
       lastSeen:chat.lastSeen||"not",
-      count:chat.count||0
+      count:chat.count||0,
+      isPinned:chat.isPinned
     };
   }));
 };

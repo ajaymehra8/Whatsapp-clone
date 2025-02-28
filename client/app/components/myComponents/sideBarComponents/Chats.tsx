@@ -13,12 +13,7 @@ import { createChat } from "./utils/createChat";
 import { useCallback } from "react";
 import socket from "@/lib/socket";
 import BottomOptions from "./chatComponents/BottomOptions";
-// types
-interface ChatType {
-  _id: string;
-  name: string;
-  latestMessage?: string;
-}
+import { ChatType } from "@/app/types/allTypes";
 
 const Chats = () => {
   const [active, setActive] = useState("All");
@@ -50,6 +45,10 @@ const Chats = () => {
         const { data } = await getAllChats();
         
         const chats = createChat(data.chats, user?._id);
+        chats.sort((a:ChatType,b:ChatType)=>(
+          (new Date(b.topMessage?.createdAt ?? 0).getTime()) -
+          (new Date(a.topMessage?.createdAt ?? 0).getTime())
+        ));
         setChats(chats);
       } catch (err) {
         if (err instanceof AxiosError) {
