@@ -7,7 +7,7 @@ import Setting from "./sideBarComponents/optionPages/Setting";
 import Profile from "./sideBarComponents/optionPages/Profile";
 
 const SideBar = () => {
-  const {dark,selectedChat,option}=useGlobalState();
+  const {selectedChat,option,user}=useGlobalState();
   return (
     <Box
       display={{base:selectedChat?"none":"flex",md:"flex"}}
@@ -20,6 +20,7 @@ const SideBar = () => {
       {option==="chats"&&<Chats/>}
       {option==="setting"&&<Setting />}
       {option==="profile"&&<Profile option="chats"/>}
+
     </Box>
   );
 };

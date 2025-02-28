@@ -8,11 +8,11 @@ import { AxiosError } from "axios";
 import { toaster } from "@/app/components/ui/toaster";
 import { updateUser } from "@/app/utils/api";
 import { IoIosArrowRoundBack } from "react-icons/io";
-interface PropType{
-  option:string
+interface PropType {
+  option: string
 }
-const Profile:React.FC<PropType> = ({option}) => {
-  const { user, dark, setUser,setOption } = useGlobalState();
+const Profile: React.FC<PropType> = ({ option }) => {
+  const { user, dark, setUser, setOption } = useGlobalState();
   const [name, setName] = useState<string>("");
   const [about, setAbout] = useState<string>("");
   const [imgSrc, setImgSrc] = useState<string | null>(null);
@@ -108,7 +108,7 @@ const Profile:React.FC<PropType> = ({option}) => {
           width={"100%"}
           padding={"0 10px"}
         >
-<IoIosArrowRoundBack cursor={"pointer"} size={'clamp(30px,3vw,40px)'} style={{marginRight:"5px"}} onClick={()=>{setOption(option)}}/>
+          <IoIosArrowRoundBack cursor={"pointer"} size={'clamp(30px,3vw,40px)'} style={{ marginRight: "5px" }} onClick={() => { setOption(option) }} />
 
           <h3
             style={{
@@ -135,12 +135,11 @@ const Profile:React.FC<PropType> = ({option}) => {
         }}>
           <Avatar.Root
             size={"lg"}
-            bg={"blue"}
             cursor={"pointer"}
-           
-              width= {{base:"clamp(30px,80vw,195px)",md:"clamp(30px,18vw,195px)"}}
-              height= {{base:"clamp(30px,80vw,195px)",md:"clamp(30px,18vw,195px)"}}
-            
+
+            width={{ base: "clamp(30px,80vw,195px)", md: "clamp(30px,18vw,195px)" }}
+            height={{ base: "clamp(30px,80vw,195px)", md: "clamp(30px,18vw,195px)" }}
+
             // Customize size
             onClick={() => {
               fileInputRef?.current?.click(); // Simulate input click
@@ -157,8 +156,8 @@ const Profile:React.FC<PropType> = ({option}) => {
 
 
           <Box
-           width= {{base:"clamp(30px,80vw,195px)",md:"clamp(30px,18vw,195px)"}}
-           height= {{base:"clamp(30px,80vw,195px)",md:"clamp(30px,18vw,195px)"}}
+            width={{ base: "clamp(30px,80vw,195px)", md: "clamp(30px,18vw,195px)" }}
+            height={{ base: "clamp(30px,80vw,195px)", md: "clamp(30px,18vw,195px)" }}
             borderRadius={"50%"}
             position={"absolute"}
             top={"0"}

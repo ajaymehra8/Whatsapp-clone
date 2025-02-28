@@ -10,6 +10,7 @@ import {
 import { Socket } from "socket.io-client";
 import getSocket from "@/lib/socket";
 import { ChatType, Message } from "../types/allTypes";
+import { createChat,createSingleChat } from "../components/myComponents/sideBarComponents/utils/createChat";
 
 
 // Define the shape of the context
@@ -33,6 +34,10 @@ interface GlobalContextType {
   setIsTyping: React.Dispatch<React.SetStateAction<boolean>>;
 option:string;
 setOption:   React.Dispatch<React.SetStateAction<string>>;
+otherUserId:string;
+setOtherUserId:   React.Dispatch<React.SetStateAction<string>>;
+showPopup:string;
+setShowPopup: React.Dispatch<React.SetStateAction<string>>
 }
 
 // Create context with a default value
@@ -44,6 +49,9 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
  const [option,setOption]=useState<string>("chats");
   const [chats, setChats] = useState<ChatType[]>([]);
   const [dark, setDark] = useState<boolean>(false);
+  const [otherUserId, setOtherUserId] = useState<string>("");
+  const [showPopup, setShowPopup] = useState<string>("");
+
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -152,7 +160,11 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
         isTyping,
         setIsTyping,
         option,
-        setOption
+        setOption,
+        otherUserId,
+        setOtherUserId,
+        showPopup,
+        setShowPopup
       }}
     >
       {children}

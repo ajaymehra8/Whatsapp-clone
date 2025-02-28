@@ -11,7 +11,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Message,selectedChatProps,ChatType} from "@/app/types/allTypes";
 
 const SelectedChat:React.FC<selectedChatProps> = ({messages,setMessages}) => {
-  const { selectedChat,socket,isTyping,setIsTyping } = useGlobalState();
+  const { selectedChat,socket,setIsTyping,otherUserId } = useGlobalState();
   const chatBoxRef = useRef<HTMLDivElement | null>(null);
   const fetchMessages = useCallback(() => {
     if (selectedChat) setMessages(selectedChat.messages);
@@ -39,7 +39,7 @@ const SelectedChat:React.FC<selectedChatProps> = ({messages,setMessages}) => {
  },[])
   return (
     <Box
-      width={{ base: "100%", md: "65%" }}
+      width={{ base: otherUserId?"0":"100%", md: otherUserId?"35%":"65%" }}
       overflow={"hidden"}
       display={{ base: selectedChat ? "flex" : "none", md: "flex" }}
       justifyContent={"center"}

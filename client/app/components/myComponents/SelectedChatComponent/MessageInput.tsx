@@ -62,9 +62,7 @@ const handleMessageChange=(e:React.ChangeEvent<HTMLTextAreaElement>)=>{
       }
       socket.emit("send_message", data.newMessage);
       if(selectedChat){
-      if (!onlineUsers.includes(selectedChat.userId)) {
         await notifyUser(selectedChat?._id);
-      }
     }
       // want to change from here
       setChats((prevChats: ChatType[]) => {

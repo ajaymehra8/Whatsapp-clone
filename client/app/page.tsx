@@ -1,20 +1,19 @@
 "use client";
-import { Box, Button } from "@chakra-ui/react";
-import { toaster } from "./components/ui/toaster";
 import FlexLayout from "./auth/components/FlexLayout";
 import SideBar from "./components/myComponents/SideBar";
 import SelectedChat from "./components/myComponents/SelectedChat";
 import { useCallback, useEffect, useState } from "react";
-import { useRouter, usePathname,redirect } from "next/navigation";
+import { useRouter, usePathname, redirect } from "next/navigation";
 import { useGlobalState } from "./context/GlobalProvider";
-import { SlControlPause } from "react-icons/sl";
-import { notifyUser } from "./utils/api";
+
 import { ChatType, Message } from "./types/allTypes";
+import UserDetails from "./components/myComponents/otherUserDetails/UserDetails";
+import PopupInfo from "./components/myComponents/PopupInfo";
 // Define a theme (optional)
 
 
 export default function Home() {
-  const { selectedChat, socket, setChats, setSelectedChat } = useGlobalState();
+  const { selectedChat, socket, setChats, setSelectedChat, otherUserId ,showPopup} = useGlobalState();
   const [messages, setMessages] = useState<Message[]>([]);
 
   const router = useRouter();
@@ -25,14 +24,14 @@ export default function Home() {
     audio.play();
   };
   const handleMessageReceived = useCallback(
-    async (newMessage:Message) => {
+    async (newMessage: Message) => {
       console.log(newMessage.sender, selectedChat);
-      if (selectedChat && newMessage.sender=== selectedChat.userId) {
-        setSelectedChat((prevSelectedChat:ChatType|null) => (
-          prevSelectedChat?{
-          ...prevSelectedChat,
-          messages: [...prevSelectedChat.messages, newMessage],
-        }:null));
+      if (selectedChat && newMessage.sender === selectedChat.userId) {
+        setSelectedChat((prevSelectedChat: ChatType | null) => (
+          prevSelectedChat ? {
+            ...prevSelectedChat,
+            messages: [...prevSelectedChat.messages, newMessage],
+          } : null));
         console.log(selectedChat);
       } else {
         playSound();
@@ -52,27 +51,27 @@ export default function Home() {
             ? { ...chat, topMessage: newMessage }
             : chat
         );
-      
+
         // Find the updated chat and ensure it's not undefined
         const updatedChat = updatedChats.find((chat) => chat?._id === newMessage.chat?._id);
-      
+
         // If updatedChat is found, move it to the front; otherwise, return the original updatedChats
         return updatedChat ? [updatedChat, ...updatedChats.filter((chat) => chat?._id !== newMessage.chat?._id)] : updatedChats;
       });
-      
+
     },
     [selectedChat, socket]
   );
   useEffect(() => {
-    if(socket){
-    socket.on("message_received", handleMessageReceived);
-    // Cleanup function to remove the event listener
+    if (socket) {
+      socket.on("message_received", handleMessageReceived);
+      // Cleanup function to remove the event listener
 
-    return () => {
-      socket.off("message_received", handleMessageReceived);
-      console.log("useEffect cleanup - socket listener removed");
-    };
-  }
+      return () => {
+        socket.off("message_received", handleMessageReceived);
+        console.log("useEffect cleanup - socket listener removed");
+      };
+    }
   }, [handleMessageReceived]);
 
   useEffect(() => {
@@ -88,6 +87,9 @@ export default function Home() {
     <FlexLayout>
       <SideBar />
       <SelectedChat messages={messages} setMessages={setMessages} />
+      {otherUserId && <UserDetails />}
+{      showPopup&&<PopupInfo />
+}
     </FlexLayout>
   );
 }

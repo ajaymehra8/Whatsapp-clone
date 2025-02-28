@@ -20,7 +20,7 @@ const ChatBox:React.FC<chatBoxProps> = ({ messages, boxRef}) => {
       w={"100%"}
       overflow={"auto"}
       marginTop={"10vh"}
-      padding={"2vh 8vw"}
+      padding={"2vh 8%"}
       display={"flex"}
       flexDirection={"column"}
       background={dark ? "#11191f" : "#e7dcd4"}
@@ -33,6 +33,9 @@ const ChatBox:React.FC<chatBoxProps> = ({ messages, boxRef}) => {
             minute: "2-digit",
             hour12: true,
           });
+          if(message.deletedFor?.includes(user._id)){
+            return null;
+          }
           return (
             <div
               className={`message ${
