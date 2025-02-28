@@ -47,7 +47,11 @@ export const getAllChats = catchAsync(
     const userId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
       user.id
     );
-    const chats: IChat[] = await Chat.find({ users: userId })
+
+    let chats: IChat[] = await Chat.find({
+      users: userId,
+      deletedFor: { $nin: userId }, // Ensure userId is not inside deletedFor array
+    })
       .populate([
         {
           path: "users",
@@ -63,6 +67,13 @@ export const getAllChats = catchAsync(
       });
       return;
     }
+
+    chats = chats.map((chat) => {
+      if (chat.deletedFor?.some((entry) => entry === userId)) {
+        return { ...chat.toObject(), topMessage: "" }; // Convert to plain object before modifying
+      }
+      return chat;
+    });
 
     res.status(200).json({
       success: true,
@@ -95,27 +106,26 @@ export const getChat = catchAsync(
 
     const chatToSend: {
       name: string | undefined;
-      image?: string | undefined;
+      image?: { name: string; link: string };
       messages: IMessage[];
       _id: mongoose.Types.ObjectId | undefined;
       userId?: mongoose.Types.ObjectId | undefined;
-      lastSeen?:Date|string;
-      count?:number;
+      lastSeen?: Date | string;
+      count?: number;
     } = {
       name: "",
-      image: "",
       messages: [],
       _id: undefined,
-
     };
 
     if (!chat) {
       const newChat: IUser | null = await User.findById(selectedUserId);
       chatToSend.name = newChat?.name;
-      chatToSend.image = newChat?.image?.link;
-      chatToSend._id=newChat?._id;
+      chatToSend.image = newChat?.image;
+      chatToSend._id = newChat?._id;
+      chatToSend.userId = newChat?._id;
       chatToSend.messages = [];
-      chatToSend.lastSeen=newChat?.lastSeen||"";
+      chatToSend.lastSeen = newChat?.lastSeen || "";
       res.status(200).json({
         success: true,
         chat: chatToSend,
@@ -124,21 +134,30 @@ export const getChat = catchAsync(
     }
 
     if (!chat.isGroupedChat) {
-      await Chat.findByIdAndUpdate(chat._id,{count:0});
+      await Chat.findByIdAndUpdate(chat._id, { count: 0 });
       const users = chat.users as IUser[]; // Assert that users are populated
       const otherUser = users[0]._id.equals(userId) ? users[1] : users[0];
       chatToSend.name = otherUser.name;
-      chatToSend.image = otherUser.image?.link;
+      chatToSend.image = otherUser.image;
       // chat.name = otherUser?.name;
       chatToSend.userId = otherUser._id;
       chatToSend._id = chat._id;
-      chatToSend.lastSeen=otherUser.lastSeen||"work";
-      chatToSend.count=0;
+      chatToSend.lastSeen = otherUser.lastSeen || "";
+      chatToSend.count = 0;
     }
     const messages: IMessage[] = await Message.find({
       chat: chat?._id,
+      deletedFor:{$nin:[userId]}
     });
-    chatToSend.messages = messages;
+    const isChatDeleted = await Chat.exists({
+      _id: chat._id,
+      "deletedFor.userId": userId,
+    });
+    if (!isChatDeleted) {
+      chatToSend.messages = messages;
+    } else {
+      chatToSend.messages = [];
+    }
 
     res.status(200).json({
       success: true,
@@ -148,30 +167,66 @@ export const getChat = catchAsync(
 );
 
 // Increase notification chat count
-export const notifyUser=catchAsync(async(req:MyRequest,res:Response,next:NextFunction)=>{
-  const {chatId}:{chatId:string|undefined}=req.body;
-  
-  const id=new mongoose.Types.ObjectId(chatId);
- let chat:IChat|null= await Chat.findById(id);
-if(!chat){
-  res.json("");
-  return;
-}
+export const notifyUser = catchAsync(
+  async (req: MyRequest, res: Response, next: NextFunction) => {
+    const { chatId }: { chatId: string | undefined } = req.body;
 
-const newCount=chat.count+1;
-chat=await Chat.findByIdAndUpdate(id,{count:newCount},{new:true})      
-.populate([
-  { path: "users", select: "name email image lastSeen" },
-  { path: "topMessage" },
-]);
+    const id = new mongoose.Types.ObjectId(chatId);
+    let chat: IChat | null = await Chat.findById(id);
+    if (!chat) {
+      res.json("");
+      return;
+    }
 
+    const newCount = chat.count + 1;
+    chat = await Chat.findByIdAndUpdate(
+      id,
+      { count: newCount },
+      { new: true }
+    ).populate([
+      { path: "users", select: "name email image lastSeen" },
+      { path: "topMessage" },
+    ]);
 
+    res.status(200).json({
+      success: true,
+      message: "Increase chat successfully",
+    });
+  }
+);
 
+// DELETE CHAT FOR USER
+export const deleteChat = catchAsync(
+  async (req: MyRequest, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      next(new AppError(401, "User is not authorized"));
+      return;
+    }
+    let userId: string | mongoose.Types.ObjectId = req.user.id;
+    let chatId: string | mongoose.Types.ObjectId = req.body.chatId;
+    userId = new mongoose.Types.ObjectId(userId);
+    chatId = new mongoose.Types.ObjectId(chatId);
+    console.log(userId, chatId);
 
-
-  res.status(200).json({
-    success:true,
-    message:"Increase chat successfully",
+    const updatedChat = await Chat.findByIdAndUpdate(
+      chatId,
+      { $push: { deletedFor:  userId } },
+      { new: true }
+    );
+    if (!updatedChat) {
+      next(new AppError(400, "No chat found to delete"));
+      return;
+    }
+    await Message.updateMany(
+      {chat:updatedChat._id},
+      { $push: { deletedFor:  userId  } },
+      { new: true }
+    );
     
-  });
-})
+    console.log(updatedChat);
+    res.status(200).json({
+      success: true,
+      message: "Chat deleted successfully",
+    });
+  }
+);

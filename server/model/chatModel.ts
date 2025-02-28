@@ -7,9 +7,10 @@ export interface IChat extends Document {
   image?: string;
   isGroupedChat?: boolean;
   groupAdmin?: mongoose.Types.ObjectId;
-  topMessage?: string;
+  topMessage?: string|undefined;
   users: (mongoose.Types.ObjectId | IUser)[]; // Allow both ObjectId & User document
   count:number;
+  deletedFor?: (mongoose.Types.ObjectId | IUser)[];
 }
 
 const chatSchema: Schema<IChat> = new mongoose.Schema<IChat>(
@@ -42,7 +43,11 @@ const chatSchema: Schema<IChat> = new mongoose.Schema<IChat>(
     count:{
       type:Number,
       default:0
-    }
+    },
+    deletedFor: [
+ { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+   
+    ],
   },
   { timestamps: true }
 );

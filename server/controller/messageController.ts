@@ -24,7 +24,7 @@ export const doMessage = catchAsync(
       next(new AppError(401, "User is not authorized"));
       return;
     }
-    let chat: IChat | null = await Chat.findById(chatId);
+    let chat: IChat | null = await Chat.findById(chatId).populate("users");
     let otherUser: IUser | null;
 
     // if no user find
@@ -32,16 +32,16 @@ export const doMessage = catchAsync(
       user.id
     );
     let newChat: boolean = false;
+    let isDeleted:boolean=false;
     const chatToSend: {
       name?: string | undefined;
-      image?: string | undefined;
+      image?: { name: string; link: string };
       messages?: IMessage[];
       _id?: mongoose.Types.ObjectId | undefined;
       userId?: mongoose.Types.ObjectId | undefined;
       lastSeen?: Date | string;
       count?: number;
       users?: (mongoose.Types.ObjectId | IUser)[]; // Allow both ObjectId & User document
-      
     } = {};
     if (!chat) {
       otherUser = await User.findById(chatId);
@@ -50,35 +50,60 @@ export const doMessage = catchAsync(
         return;
       }
       chat = await Chat.create({ users: [userId, otherUser._id] });
+      if (chat) chat = await Chat.findById(chat._id).populate("users");
       newChat = true;
       chatToSend.name = otherUser?.name;
-      chatToSend.image = otherUser?.image?.link;
+      chatToSend.image = otherUser?.image;
       chatToSend._id = chat?._id;
       chatToSend.lastSeen = otherUser?.lastSeen || "";
       chatToSend.userId = otherUser._id;
 
       chatToSend.users = chat?.users;
-    }
+    } else {
+      console.log("coming here");
+      const otherUser =
+        chat.users[0]._id.toString() === userId.toString()
+          ? chat.users[1] as IUser
+          : chat.users[0] as IUser;
+      const deletedForOtherUser = chat.deletedFor?.includes(otherUser._id);
+      if (deletedForOtherUser) {
+        console.log("working");
+        newChat = true;
+        isDeleted=true;
+        if (chat) chat = await Chat.findById(chat._id).populate("users");
+        newChat = true;
+        chatToSend.name = otherUser?.name;
+        chatToSend.image = otherUser?.image;
+        chatToSend._id = chat?._id;
+        chatToSend.lastSeen = otherUser?.lastSeen || "";
+        chatToSend.userId = otherUser._id;
 
+        chatToSend.users = chat?.users;
+        await Chat.findByIdAndUpdate(chat?._id,{deletedFor:[]});
+      }
+    }
     let message: IMessage | null = await Message.create({
       sender: userId,
-      chat: chat._id,
+      chat: chat?._id,
       content,
     });
 
     message = await Message.findById(message._id).populate("chat");
-    if (newChat) {
+    if(newChat && isDeleted){
+const allMessages:(IMessage)[]=await Message.find({chat:chat?._id}).populate("chat");
+chatToSend.messages=allMessages;
+chatToSend.count=0;
+    } else if (newChat) {
       if (message) {
         chatToSend.messages = [message];
-        chatToSend.count=0;
-      }
-      else {
+        chatToSend.count = 0;
+      } else {
         chatToSend.messages = [];
       }
     }
     chat = await Chat.findByIdAndUpdate(
-      chat._id,
-      { topMessage: message?._id},
+      chat?._id,
+      { topMessage: message?._id },
       { new: true }
     );
     res.status(201).json({

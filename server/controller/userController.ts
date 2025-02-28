@@ -57,6 +57,14 @@ export const getUsers = catchAsync(
     users = users.filter(
       (user) => !oneToOneChatUserIds.includes(user._id.toString())
     );
+    oneToOneChats = oneToOneChats.map(chat => {
+      
+      if (chat.deletedFor?.some(entry => entry.toString() === userId.toString())) {
+        console.log("working");
+        return { ...chat.toObject(), topMessage: "" }; // Convert to plain object before modifying
+      }
+      return chat;
+    });
     res.status(200).json({
       success: true,
       message: users ? "User fetched" : "No user or contact found.",
@@ -65,7 +73,28 @@ export const getUsers = catchAsync(
     });
   }
 );
-// update profile
+
+
+
+// GET USER
+export const getUser=catchAsync(async(req:MyRequest,res:Response,next:NextFunction)=>{
+  const {userId}=req.params as {userId:string|undefined};
+
+  if(!userId){
+    next(new AppError(400,"No user selected"));
+    return;
+  }
+const id=new mongoose.Types.ObjectId(userId);
+const user:IUser|null=await User.findById(id);
+res.status(200).json({
+  success:true,
+  message:"User fetched successfully",
+  user
+})
+});
+
+// UPDATE PROFILE
+
 type updateBody = {
   name?: string;
   about?: string;
@@ -74,6 +103,8 @@ type updateBody = {
     link: string;
   };
 };
+
+// UPDATE PROFILE OF USER
 
 export const updateProfile = catchAsync(
   async (req: MyRequest, res: Response, next: NextFunction) => {
@@ -122,3 +153,4 @@ export const updateProfile = catchAsync(
     });
   }
 );
+
