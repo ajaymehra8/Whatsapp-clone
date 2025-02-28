@@ -65,7 +65,7 @@ const ChatHead = () => {
       >
         <IoMdArrowRoundBack size={"25px"} className="backBtn" onClick={handleBackClick} />
 
-        <Avatar.Root size={"sm"} bg={"blue"} onClick={() => setOtherUserId(selectedChat?.userId)}
+        <Avatar.Root size={"sm"} onClick={() => setOtherUserId(selectedChat?.userId)}
         >
           <Avatar.Fallback name={selectedChat?.name} />
           <Avatar.Image

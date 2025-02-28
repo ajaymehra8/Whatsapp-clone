@@ -24,11 +24,7 @@ boxRef: MutableRefObject<HTMLDivElement | null>;  // ✅ Correctly type boxRef
 export interface ChatType {
   _id: string;
   name: string;
-  topMessage:{
-    sender:string,
-    content:string,
-    createdAt:Date
-  };
+  topMessage:Message;
   userId: string;
   count: number;
   lastSeen?: Date | string;
