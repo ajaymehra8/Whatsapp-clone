@@ -79,6 +79,7 @@ const CardOptions: React.FC<Props> = ({ openOptionId, setOpenOptionId }) => {
       }
     }
   };
+
   return (
     <Box
       w={"40%"}
@@ -98,7 +99,10 @@ const CardOptions: React.FC<Props> = ({ openOptionId, setOpenOptionId }) => {
           className="option-item"
           onClick={(e) => {
             e.stopPropagation();
-            if (openOptionId) setShowPopup(openOptionId._id);
+            if (openOptionId) {
+              
+              setShowPopup(openOptionId?._id);
+            };
             setOpenOptionId(null);
           }}
         >

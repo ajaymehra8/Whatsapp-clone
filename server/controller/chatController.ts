@@ -223,7 +223,7 @@ export const deleteChat = catchAsync(
 
     const updatedChat = await Chat.findByIdAndUpdate(
       chatId,
-      { $push: { deletedFor:  userId } },
+      { $push: { deletedFor:  userId },$pull:{pinnedBy:userId} },
       { new: true }
     );
     if (!updatedChat) {

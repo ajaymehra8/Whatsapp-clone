@@ -2,11 +2,9 @@
 
 import { useGlobalState } from "@/app/context/GlobalProvider";
 import { Box, Avatar } from "@chakra-ui/react";
-import { SlOptionsVertical } from "react-icons/sl";
 import { IoMdArrowRoundBack } from "react-icons/io";
 
 
-import { Tooltip } from "../../ui/tooltip";
 
 const ChatHead = () => {
   const { selectedChat, dark, onlineUsers, setSelectedChat, isTyping, setOtherUserId, otherUserId } = useGlobalState();
@@ -18,21 +16,35 @@ const ChatHead = () => {
     const now: Date = new Date();
   
     const diffMs: number = now.getTime() - date.getTime();
-    const diffHours: number = diffMs / (1000 * 60 * 60);
-  
+    const diffDays: number = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
     const formattedTime = date.toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit",
       hour12: true
     });
-  
-    if (diffHours < 24 && date.getDate() === now.getDate()) {
-      return `at ${formattedTime}`; // Same day, return time only
-    } else if (diffHours < 48 && date.getDate() === now.getDate() - 1) {
-      return `yesterday at ${formattedTime}`; // Show "Yesterday + time"
-    } else {
-      return `${now.getDate()-date.getDate()} days ago`// Older dates include time
-    }
+    const yesterday = new Date();
+    yesterday.setDate(now.getDate() - 1);
+
+    if (
+      now.getFullYear() === date.getFullYear() &&
+      now.getMonth() === date.getMonth() &&
+      now.getDate() === date.getDate()
+  ) {
+      return `at ${formattedTime}`;
+  }
+  // Yesterday (handles month/year transitions)
+  else if (
+      date.getFullYear() === yesterday.getFullYear() &&
+      date.getMonth() === yesterday.getMonth() &&
+      date.getDate() === yesterday.getDate()
+  ) {
+      return `yesterday at ${formattedTime}`;
+  }
+  // Older dates
+  else {
+      return `${diffDays} days ago`;
+  }
   }
   
 
@@ -98,19 +110,12 @@ const ChatHead = () => {
             }}
           >
             {onlineUsers.includes(selectedChat?.userId || selectedChat?._id)
-              ? (isTyping ? "typing..." : "Online")
-              : (isTyping ? "typing..." : `last seen ${formatTimestamp(selectedChat?.lastSeen)}`)}{" "}
+              ? ((isTyping && isTyping._id===selectedChat._id)? "typing..." : "Online")
+              : ((isTyping&& isTyping._id===selectedChat._id) ? "typing..." : `last seen ${formatTimestamp(selectedChat?.lastSeen)}`)}{" "}
           </p>
         </div>
       </Box>
-      <Tooltip content="Menu" positioning={{ placement: "bottom" }}>
-        <SlOptionsVertical
-          size="15px"
-          color={dark ? "#aebac1" : "#54656f"}
-          cursor="pointer"
-          style={{ zIndex: 10 }}
-        />
-      </Tooltip>
+      
     </Box>
   );
 };
