@@ -51,12 +51,29 @@ export default function Home() {
             ? { ...chat, topMessage: newMessage }
             : chat
         );
-
-        // Find the updated chat and ensure it's not undefined
         const updatedChat = updatedChats.find((chat) => chat?._id === newMessage.chat?._id);
 
-        // If updatedChat is found, move it to the front; otherwise, return the original updatedChats
-        return updatedChat ? [updatedChat, ...updatedChats.filter((chat) => chat?._id !== newMessage.chat?._id)] : updatedChats;
+        let pinnedChats=updatedChats.filter((chat)=>chat.isPinned);
+        const oldChats=updatedChats.filter((c)=>(!c.isPinned && newMessage.chat._id!==c._id));
+        let isPinned:boolean=false;
+        if(!updatedChat){
+          return [...pinnedChats,...oldChats];
+        }
+
+        if (pinnedChats.some((c) => c._id === updatedChat._id)) {
+          isPinned=true;
+          pinnedChats = pinnedChats.map((c) => {
+            if (updatedChat?._id === c._id) {
+              return updatedChat;
+            }
+            return c;
+          });
+        }
+        if(isPinned){
+          return [...pinnedChats, ...oldChats];
+        }
+        return [...pinnedChats,updatedChat,...oldChats];
+
       });
 
     },

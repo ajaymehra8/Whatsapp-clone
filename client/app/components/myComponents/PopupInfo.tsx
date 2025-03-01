@@ -54,7 +54,7 @@ const PopupInfo = () => {
       zIndex={15}
     >
       <h4 style={{ fontSize: "clamp(15px,5vw,22px)" }}>Delete this chat ?</h4>
-      <div className="bottom-btns">
+      <div className="bottom-btns" >
         <button className="cancel-btn" onClick={() => setShowPopup("")}>
           Cancel
         </button>

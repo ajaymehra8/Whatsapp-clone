@@ -5,15 +5,14 @@ import {
   useState,
   ReactNode,
   useEffect,
-  useMemo
+  useMemo,
 } from "react";
 import { Socket } from "socket.io-client";
 import getSocket from "@/lib/socket";
-import { ChatType, Message } from "../types/allTypes";
-import { createChat,createSingleChat } from "../components/myComponents/sideBarComponents/utils/createChat";
-
+import { ChatType } from "../types/allTypes";
 
 // Define the shape of the context
+
 interface GlobalContextType {
   selectedChat: ChatType | null;
   setSelectedChat: React.Dispatch<React.SetStateAction<ChatType | null>>;
@@ -25,19 +24,19 @@ interface GlobalContextType {
   setToken: React.Dispatch<React.SetStateAction<any>>;
   fetchAgain: boolean;
   setFetchAgain: React.Dispatch<React.SetStateAction<boolean>>;
-  socket: typeof Socket|null; // Define socket in the context
+  socket: typeof Socket | null; // Define socket in the context
   onlineUsers: string[];
   setOnlineUsers: React.Dispatch<React.SetStateAction<string[]>>;
   chats: ChatType[];
   setChats: React.Dispatch<React.SetStateAction<ChatType[]>>;
-  isTyping: boolean;
-  setIsTyping: React.Dispatch<React.SetStateAction<boolean>>;
-option:string;
-setOption:   React.Dispatch<React.SetStateAction<string>>;
-otherUserId:string;
-setOtherUserId:   React.Dispatch<React.SetStateAction<string>>;
-showPopup:string;
-setShowPopup: React.Dispatch<React.SetStateAction<string>>
+  isTyping: ChatType | null;
+  setIsTyping: React.Dispatch<React.SetStateAction<ChatType | null>>;
+  option: string;
+  setOption: React.Dispatch<React.SetStateAction<string>>;
+  otherUserId: string;
+  setOtherUserId: React.Dispatch<React.SetStateAction<string>>;
+  showPopup: string;
+  setShowPopup: React.Dispatch<React.SetStateAction<string>>;
 }
 
 // Create context with a default value
@@ -46,12 +45,11 @@ const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
 // Provider component
 export const GlobalProvider = ({ children }: { children: ReactNode }) => {
   const [selectedChat, setSelectedChat] = useState<ChatType | null>(null); // Example global state
- const [option,setOption]=useState<string>("chats");
+  const [option, setOption] = useState<string>("chats");
   const [chats, setChats] = useState<ChatType[]>([]);
   const [dark, setDark] = useState<boolean>(false);
   const [otherUserId, setOtherUserId] = useState<string>("");
   const [showPopup, setShowPopup] = useState<string>("");
-
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -62,7 +60,7 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<any>(null);
   const [token, setToken] = useState<any>(null);
   const [fetchAgain, setFetchAgain] = useState<boolean>(false);
-  const [isTyping, setIsTyping] = useState<boolean>(false);
+  const [isTyping, setIsTyping] = useState<ChatType | null>(null);
   const socket = getSocket(); // Initialize socket
 
   // Listen for system theme changes
@@ -104,8 +102,7 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
   // Emit "setup" event when the user is available and socket is ready
   useEffect(() => {
     if (user && socket) {
-      if(!socket.connected)
-      socket.connect();
+      if (!socket.connected) socket.connect();
       socket.emit("setup", user);
       const handleOnlineUsers = (users: string[]) => {
         setOnlineUsers(users);
@@ -116,15 +113,34 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
       }) => {
         if (selectedChat?.userId === data.userId) {
           console.log(selectedChat);
-          setSelectedChat((prevSelectedChat: ChatType|null) =>
-            prevSelectedChat!==null
+          setSelectedChat((prevSelectedChat: ChatType | null) =>
+            prevSelectedChat !== null
               ? { ...prevSelectedChat, lastSeen: data.lastSeen }
               : null
           );
         }
       };
       const handleNewChat = (chat: ChatType) => {
-        setChats((prevChats) => [chat, ...prevChats]);
+        setChats((prevChats) => {
+          let pinnedChats = prevChats.filter((chat) => chat.isPinned);
+          const oldChats = prevChats.filter(
+            (c) => !c.isPinned && chat._id !== c._id
+          );
+          let isPinned: boolean = false;
+          if (pinnedChats.some((c) => c._id === chat._id)) {
+            isPinned = true;
+            pinnedChats = pinnedChats.map((c) => {
+              if (chat._id === c._id) {
+                return chat;
+              }
+              return c;
+            });
+          }
+          if (isPinned) {
+            return [...pinnedChats, ...oldChats];
+          }
+          return [...pinnedChats, chat, ...oldChats];
+        });
       };
       socket.on("update_users", handleOnlineUsers);
       socket.on("user_status_changed", handleStatusChanged);
@@ -164,7 +180,7 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
         otherUserId,
         setOtherUserId,
         showPopup,
-        setShowPopup
+        setShowPopup,
       }}
     >
       {children}

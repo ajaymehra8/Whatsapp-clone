@@ -80,6 +80,8 @@ const ChatCard = ({ chat }: { chat: any }) => {
     }
   };
 
+
+
   const toggleOptions = (e: React.MouseEvent<HTMLOrSVGElement>) => {
     e?.stopPropagation();
     setOpenOptionId((prev) => (prev?._id === chat._id ? null : chat)); // Toggle only one card

@@ -104,16 +104,11 @@ const Chats = () => {
           <Box
             display={"flex"}
             justifyContent={"space-between"}
-            width={"20%"}
+            width={"10%"}
             alignItems={"center"}
           >
             <MdOutlineAddComment
               size="20px"
-              color={dark ? "#a5b1b8" : "#54656f"}
-              cursor="pointer"
-            />
-            <SlOptionsVertical
-              size="17px"
               color={dark ? "#a5b1b8" : "#54656f"}
               cursor="pointer"
             />

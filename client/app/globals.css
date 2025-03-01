@@ -117,14 +117,28 @@ a {
   margin-top: 3px;
   max-width: 50%;
   padding: 3px 5px;
+  padding-right: 18px;
   position: relative;
   border-radius: 5px;
   font-size: 14px;
+  cursor: pointer;
 }
-
+.message:hover .message-down-icon{
+  display:inherit;
+}
 .other-user-message {
   background: var(--other-user-message-bg);
 }
+.other-user-message .messageOption{
+right: -160%;
+}
+.user-message {
+  background: var(--user-message-bg);
+  align-self: flex-end;
+}
+.user-message .messageOption{
+  left: -160%;
+  }
 .message-time {
   align-self: flex-end;
   margin-left: 20px;
@@ -132,10 +146,7 @@ a {
   font-size: clamp(8px, 2vw, 10px);
   color: #92a091;
 }
-.user-message {
-  background: var(--user-message-bg);
-  align-self: flex-end;
-}
+
 /* SCROLLBAR CSS */
 /* Width of the scrollbar */
 ::-webkit-scrollbar {
@@ -321,6 +332,17 @@ transform: scale(1);  }
 }
 
 /* POPUP STYLE END */
+
+/* MESSAGE STYLE START */
+
+.message-down-icon{
+position: absolute;
+right: 3%;
+top:20%;
+cursor: pointer;
+}
+
+/* MESSAGE STYLE END */
 .downIcon{
   display: none;
 }
