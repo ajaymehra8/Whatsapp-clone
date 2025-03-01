@@ -145,6 +145,7 @@ const Chats = () => {
         flexDirection={"column"}
         marginTop={height + 25 + "px"}
         height={"75vh"}
+        pb={{base:'30px',md:0}}
         overflowY={"auto"}
         bg={dark ? "#111b21" : ""}
       >

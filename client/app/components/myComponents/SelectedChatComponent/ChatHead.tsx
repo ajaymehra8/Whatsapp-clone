@@ -63,9 +63,10 @@ const ChatHead = () => {
       alignItems={"center"}
       padding={"10px 25px 10px 15px"}
       width={{ base: "100%", md: otherUserId ? "35%" : "65%" }}
-      top={0}
       cursor={'pointer'}
       position={"fixed"}
+      top={0}
+
       zIndex={10}
     >
       <Box

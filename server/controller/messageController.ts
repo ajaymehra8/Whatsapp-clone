@@ -45,6 +45,11 @@ export const doMessage = catchAsync(
     } = {};
     if (!chat) {
       otherUser = await User.findById(chatId);
+      const chatAlreadyCreated:IChat|null=await Chat.findOne({users:{$all:[userId,otherUser?._id]}});
+      if(chatAlreadyCreated){
+        next(new AppError(400,"Chat is already created"));
+        return;
+      }
       if (!otherUser) {
         next(new AppError(400, "No user or chat selected"));
         return;
@@ -52,6 +57,7 @@ export const doMessage = catchAsync(
       chat = await Chat.create({ users: [userId, otherUser._id] });
       if (chat) chat = await Chat.findById(chat._id).populate("users");
       newChat = true;
+      console.log('new chat created');
       chatToSend.name = otherUser?.name;
       chatToSend.image = otherUser?.image;
       chatToSend._id = chat?._id;
