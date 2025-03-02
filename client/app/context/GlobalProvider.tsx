@@ -9,7 +9,7 @@ import {
 } from "react";
 import { Socket } from "socket.io-client";
 import getSocket from "@/lib/socket";
-import { ChatType } from "../types/allTypes";
+import { ChatType, Message } from "../types/allTypes";
 
 // Define the shape of the context
 
@@ -37,6 +37,9 @@ interface GlobalContextType {
   setOtherUserId: React.Dispatch<React.SetStateAction<string>>;
   showPopup: string;
   setShowPopup: React.Dispatch<React.SetStateAction<string>>;
+  messagePopup:Message|null;
+  setMessagePopup: React.Dispatch<React.SetStateAction<Message|null>>;
+
 }
 
 // Create context with a default value
@@ -50,6 +53,8 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
   const [dark, setDark] = useState<boolean>(false);
   const [otherUserId, setOtherUserId] = useState<string>("");
   const [showPopup, setShowPopup] = useState<string>("");
+  const [messagePopup, setMessagePopup] = useState<Message|null>(null);
+
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -181,6 +186,8 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
         setOtherUserId,
         showPopup,
         setShowPopup,
+        messagePopup,
+        setMessagePopup
       }}
     >
       {children}

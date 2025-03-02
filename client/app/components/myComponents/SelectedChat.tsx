@@ -14,6 +14,7 @@ const SelectedChat:React.FC<selectedChatProps> = ({messages,setMessages}) => {
   const { selectedChat,socket,setIsTyping,otherUserId } = useGlobalState();
   const chatBoxRef = useRef<HTMLDivElement | null>(null);
   const fetchMessages = useCallback(() => {
+    console.log(selectedChat?.messages);
     if (selectedChat) setMessages(selectedChat.messages);
   }, [selectedChat]);
   useEffect(() => {

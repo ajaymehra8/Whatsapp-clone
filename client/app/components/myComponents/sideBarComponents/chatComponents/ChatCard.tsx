@@ -9,6 +9,7 @@ import CardOptions from "./CardOptions";
 import { useState, useRef, useEffect } from "react";
 import { TiPin } from "react-icons/ti";
 import { ChatType } from "@/app/types/allTypes";
+import { FaBan } from "react-icons/fa6";
 
 const ChatCard = ({ chat }: { chat: any }) => {
   const { selectedChat, setSelectedChat, setChats, user } = useGlobalState();
@@ -80,8 +81,6 @@ const ChatCard = ({ chat }: { chat: any }) => {
     }
   };
 
-
-
   const toggleOptions = (e: React.MouseEvent<HTMLOrSVGElement>) => {
     e?.stopPropagation();
     setOpenOptionId((prev) => (prev?._id === chat._id ? null : chat)); // Toggle only one card
@@ -140,17 +139,39 @@ const ChatCard = ({ chat }: { chat: any }) => {
             {chat?.name}
           </p>
           {chat?.topMessage?.content ? (
-            <p
-              style={{
-                fontSize: "12px",
-                padding: 0,
-                margin: 0,
-                color: "#667781",
-                marginTop: "-2px",
-              }}
-            >
-              {chat?.topMessage?.content}
-            </p>
+            !chat?.topMessage?.deletedForEveryone ? (
+              <p
+                style={{
+                  fontSize: "12px",
+                  padding: 0,
+                  margin: 0,
+                  color: "#667781",
+                  marginTop: "-2px",
+                }}
+              >
+                {chat?.topMessage?.content}
+              </p>
+            ) : (
+              <p
+                style={{
+                  fontSize: "12px",
+                  padding: 0,
+                  margin: 0,
+                  color: "#667781",
+                  marginTop: "-2px",
+                }}
+              >
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "4px",
+                  }}
+                >
+                  <FaBan /> Sender deleted this message
+                </span>
+              </p>
+            )
           ) : (
             ""
           )}
@@ -169,7 +190,7 @@ const ChatCard = ({ chat }: { chat: any }) => {
               alignItems: "center",
             }}
           >
-            {chat?.isPinned && <TiPin color="#aebac1" size={'20px'}/>}
+            {chat?.isPinned && <TiPin color="#aebac1" size={"20px"} />}
 
             {chat?.count > 0 && chat?.topMessage?.sender !== user?._id && (
               <>

@@ -58,7 +58,6 @@ const MessageInput = () => {
         const { data } = await doMessage(selectedChat?._id, message);
 setMessage("");
         if (data.newChat) {
-          console.log(data.chat);
           setSelectedChat(data.chat);
           socket.emit("new_chat", data.chat);
           socket.emit("join_chat", data.chat?._id); // Emit event to server
@@ -73,9 +72,7 @@ setMessage("");
           );
         }
         socket.emit("send_message", data.newMessage);
-        if (selectedChat) {
-          await notifyUser(selectedChat?._id);
-        }
+        
         // want to change from here
         setChats((prevChats: ChatType[]) => {
           if (!selectedChat) return prevChats; // Ensure selectedChat is defined

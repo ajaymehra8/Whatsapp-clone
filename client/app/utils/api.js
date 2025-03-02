@@ -40,5 +40,7 @@ export const unpinTheChat=(chatId)=>API.post(`/chat/unpin-chat`,{chatId});
 
 //message api calls
 export const doMessage=(chatId,content)=>API.post(`/message`,{chatId,content});
+export const deleteForMe=(messageId)=>API.post(`/message/delete-for-me`,{messageId});
+export const deleteForEveryone=(messageId)=>API.post(`/message/delete-for-everyone`,{messageId});
 
 export default API;

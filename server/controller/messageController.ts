@@ -32,12 +32,12 @@ export const doMessage = catchAsync(
       user.id
     );
     let newChat: boolean = false;
-    let isDeleted:boolean=false;
+    let isDeleted: boolean = false;
     const chatToSend: {
       name?: string | undefined;
       image?: { name: string; link: string };
       messages?: IMessage[];
-      topMessage?:IMessage|null;
+      topMessage?: IMessage | null;
       _id?: mongoose.Types.ObjectId | undefined;
       userId?: mongoose.Types.ObjectId | undefined;
       lastSeen?: Date | string;
@@ -46,9 +46,11 @@ export const doMessage = catchAsync(
     } = {};
     if (!chat) {
       otherUser = await User.findById(chatId);
-      const chatAlreadyCreated:IChat|null=await Chat.findOne({users:{$all:[userId,otherUser?._id]}});
-      if(chatAlreadyCreated){
-        next(new AppError(400,"Chat is already created"));
+      const chatAlreadyCreated: IChat | null = await Chat.findOne({
+        users: { $all: [userId, otherUser?._id] },
+      });
+      if (chatAlreadyCreated) {
+        next(new AppError(400, "Chat is already created"));
         return;
       }
       if (!otherUser) {
@@ -58,7 +60,7 @@ export const doMessage = catchAsync(
       chat = await Chat.create({ users: [userId, otherUser._id] });
       if (chat) chat = await Chat.findById(chat._id).populate("users");
       newChat = true;
-      console.log('new chat created');
+      console.log("new chat created");
       chatToSend.name = otherUser?.name;
       chatToSend.image = otherUser?.image;
       chatToSend._id = chat?._id;
@@ -69,15 +71,15 @@ export const doMessage = catchAsync(
     } else {
       const otherUser =
         chat.users[0]._id.toString() === userId.toString()
-          ? chat.users[1] as IUser
-          : chat.users[0] as IUser;
+          ? (chat.users[1] as IUser)
+          : (chat.users[0] as IUser);
       const deletedForOtherUser = chat.deletedFor?.includes(otherUser._id);
-      await Chat.findByIdAndUpdate(chat?._id,{deletedFor:[]});
+      await Chat.findByIdAndUpdate(chat?._id, { deletedFor: [] });
 
       if (deletedForOtherUser) {
         console.log("working");
         newChat = true;
-        isDeleted=true;
+        isDeleted = true;
         if (chat) chat = await Chat.findById(chat._id).populate("users");
         newChat = true;
         chatToSend.name = otherUser?.name;
@@ -96,15 +98,17 @@ export const doMessage = catchAsync(
     });
 
     message = await Message.findById(message._id).populate("chat");
-    if(newChat && isDeleted){
-const allMessages:(IMessage)[]=await Message.find({chat:chat?._id}).populate("chat");
-chatToSend.messages=allMessages;
-chatToSend.topMessage=message;
-chatToSend.count=0;
+    if (newChat && isDeleted) {
+      const allMessages: IMessage[] = await Message.find({
+        chat: chat?._id,
+      }).populate("chat");
+      chatToSend.messages = allMessages;
+      chatToSend.topMessage = message;
+      chatToSend.count = 0;
     } else if (newChat) {
       if (message) {
         chatToSend.messages = [message];
-        chatToSend.topMessage=message;
+        chatToSend.topMessage = message;
         chatToSend.count = 0;
       } else {
         chatToSend.messages = [];
@@ -137,6 +141,73 @@ export const getAllMessage = catchAsync(
       success: true,
       message: "All messages fetched",
       allMessage,
+    });
+  }
+);
+
+// DELETE MESSAGE for me
+
+export const deleteMessageForMe = catchAsync(
+  async (req: MyRequest, res: Response, next: NextFunction) => {
+    const { messageId } = req.body;
+    const user = req.user;
+    if (!user) {
+      next(new AppError(401, "Your are not authorized"));
+      return;
+    }
+    if (!messageId) {
+      next(new AppError(400, "No message selected to delete"));
+      return;
+    }
+    const userId = new mongoose.Types.ObjectId(user?.id);
+    const id = new mongoose.Types.ObjectId(messageId);
+    await Message.findByIdAndUpdate(
+      id,
+      { $push: { deletedFor: userId } },
+      { new: true }
+    );
+    console.log("deleted");
+    res.status(200).json({
+      success: true,
+      message: "Message Deleted successfully",
+    });
+  }
+);
+
+// DELETE MESSAGE FOR EVERYONE
+export const deleteMessageForEveryone = catchAsync(
+  async (req: MyRequest, res: Response, next: NextFunction) => {
+    const { messageId } = req.body;
+    const user = req.user;
+    if (!user) {
+      next(new AppError(401, "Your are not authorized"));
+      return;
+    }
+    if (!messageId) {
+      next(new AppError(400, "No message selected to delete"));
+      return;
+    }
+    const id = new mongoose.Types.ObjectId(messageId);
+    const userId = new mongoose.Types.ObjectId(user?.id);
+
+    const message = await Message.findById(id);
+    if (!message?.sender.equals(userId)) {
+      next(new AppError(401, "You are not sender of message"));
+      return;
+    }
+    const newMessage: IMessage | null = await Message.findByIdAndUpdate(
+      id,
+      { deletedForEveryone: true, content: "Message Deleted" },
+      { new: true }
+    ).populate({ path: "chat", select: "_id users" });
+    if (!newMessage) {
+      next(new AppError(404, "No message found"));
+      return;
+    }
+    res.status(200).json({
+      success: true,
+      message: "Message Deleted successfully",
+      newMessage,
     });
   }
 );

@@ -5,12 +5,15 @@ import mongoose from "mongoose";
 const users: Map<string, string> = new Map();
 
 // types
+interface SingleChat {
+  _id: string;
+}
 interface Message {
   _id: string; // Assuming MongoDB ObjectId is a string
   sender: string; // User ID of the sender
   content: string;
   createdAt: string; // ISO Date string
-  chat: string;
+  chat: SingleChat;
   deletedFor?: string[];
 }
 interface UserType {
@@ -68,6 +71,24 @@ const socketHandler = (io: Server) => {
             const receiverSocketId = users.get(userId);
             if (receiverSocketId) {
               io.to(receiverSocketId).emit("message_received", data);
+            }
+          }
+        });
+      }
+    );
+    // Handle message delete for everyone
+    socket.on(
+      "message_deleted",
+      ({chat,message}:{chat:ChatType,message:Message}) => {
+
+       const sender=message.sender;
+       console.log(chat);
+        chat.users?.forEach((user: UserType) => {
+          if (user?._id !== sender) {
+            const receiverSocketId = users.get(user?._id);
+            if (receiverSocketId) {
+              console.log("emited");
+              io.to(receiverSocketId).emit("message_deleted", message);
             }
           }
         });

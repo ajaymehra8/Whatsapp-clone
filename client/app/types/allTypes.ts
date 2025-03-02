@@ -9,6 +9,7 @@ export interface Message {
   createdAt: string; // ISO Date string
   chat: chat;
   deletedFor?: string[];
+  deletedForEveryone?:boolean
 }
 
 export interface selectedChatProps {
