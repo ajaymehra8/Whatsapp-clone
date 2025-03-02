@@ -11,6 +11,7 @@
   --rounded-btn-hover-bg: #e7e8eb;
   --user-message-bg: #d9fdd3;
   --other-user-message-bg: #fff;
+  --border-color:#e9edef;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -28,6 +29,8 @@
     --user-message-bg: #005c4b;
     --other-user-message-bg: #202c33;
     --notification-color: #00a884;
+    --border-color:#46555f;
+
   }
 }
 * {
@@ -278,7 +281,7 @@ right: -160%;
   padding: 2px 4px;
 }
 .option-ul li:hover {
-  background: #111b21;
+  background: var(--scrollbar-thumb);
 }
 
 /* CARD OPTIONS STYLE END */
@@ -307,7 +310,7 @@ transform: scale(1);  }
   margin-top: auto;
 }
 .bottom-btns button {
-  border: 1px solid #43515c;
+  border: 1px solid var(--border-color);
   padding: 5px 20px;
   box-sizing: border-box;
   border-radius: 100px;

@@ -170,7 +170,7 @@ setUser(data?.user);
 
           }}
           letterSpacing={'1px'}
-          color={'#ac4855'}
+          color={dark?'#ac4855':"#ef426c"}
           >
             <FaBan size={'17px'}/>
 
@@ -195,7 +195,7 @@ setUser(data?.user);
 
           }}
           letterSpacing={'1px'}
-          color={'#ac4855'}
+          color={dark?'#ac4855':"#ef426c"}
           onClick={(e) => {
             e.stopPropagation();
             setOtherUserId("");

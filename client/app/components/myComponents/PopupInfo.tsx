@@ -6,15 +6,23 @@ import { toaster } from "../ui/toaster";
 import { chats, deleteChat } from "@/app/utils/api";
 
 const PopupInfo = () => {
-  const { setShowPopup, showPopup, setChats,selectedChat,setSelectedChat,setOtherUserId } = useGlobalState();
+  const {
+    setShowPopup,
+    showPopup,
+    setChats,
+    selectedChat,
+    setSelectedChat,
+    setOtherUserId,
+    dark,
+  } = useGlobalState();
 
   const handleDelete = async () => {
     try {
       const chatId = showPopup;
-     
+
       const { data } = await deleteChat(chatId);
       if (data.success) {
-        if(chatId===selectedChat?._id){
+        if (chatId === selectedChat?._id) {
           setSelectedChat(null);
           setOtherUserId("");
         }
@@ -47,14 +55,15 @@ const PopupInfo = () => {
       padding={"15px 30px"}
       position={"absolute"}
       alignSelf={"center"}
-      background={"#3b4a54"}
+      background={dark?"#3b4a54":"#ffffff"}
+      shadow={dark?"none":"lg"}
       borderRadius={"2px"}
       minH={"25vh"}
       className="popup-box"
       zIndex={15}
     >
       <h4 style={{ fontSize: "clamp(15px,5vw,22px)" }}>Delete this chat ?</h4>
-      <div className="bottom-btns" >
+      <div className="bottom-btns">
         <button className="cancel-btn" onClick={() => setShowPopup("")}>
           Cancel
         </button>

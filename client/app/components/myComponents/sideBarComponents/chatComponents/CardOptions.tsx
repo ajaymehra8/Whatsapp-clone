@@ -10,7 +10,7 @@ interface Props {
   setOpenOptionId: React.Dispatch<React.SetStateAction<ChatType | null>>;
 }
 const CardOptions: React.FC<Props> = ({ openOptionId, setOpenOptionId }) => {
-  const { setShowPopup, setChats } = useGlobalState();
+  const { setShowPopup, setChats,dark } = useGlobalState();
   console.log(openOptionId);
   const pinChat = async (e:React.MouseEvent<HTMLLIElement>) => {
     e.stopPropagation();
@@ -88,7 +88,8 @@ const CardOptions: React.FC<Props> = ({ openOptionId, setOpenOptionId }) => {
       right={"3%"}
       bottom={"-70px"}
       zIndex={10}
-      background={"#233138"}
+      background={dark?"#233138":"#ffffff"}
+      boxShadow={!dark?"md":"none"}
       transition={"all .5s"}
     >
       <ul className="option-ul">
