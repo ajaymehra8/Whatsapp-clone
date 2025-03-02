@@ -6,6 +6,7 @@ export interface IMessage extends Document {
   chat: mongoose.Types.ObjectId;
   content:string;
   deletedFor?:mongoose.Types.ObjectId[];
+  deletedForEveryone?:boolean
 };
 
 const messageSchema:Schema<IMessage>=new mongoose.Schema<IMessage>({
@@ -28,7 +29,11 @@ deletedFor:[
         type:mongoose.Schema.Types.ObjectId,
         ref:'User'
     }
-]
+],
+deletedForEveryone:{
+    type:Boolean,
+    default:false
+}
 },{timestamps:true});
 const messageModel:Model<IMessage>=mongoose.model<IMessage>("Message",messageSchema);
 export default messageModel;

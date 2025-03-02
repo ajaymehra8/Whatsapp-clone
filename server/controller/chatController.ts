@@ -123,6 +123,7 @@ export const getChat = catchAsync(
       messages: IMessage[];
       _id: mongoose.Types.ObjectId | undefined;
       userId?: mongoose.Types.ObjectId | undefined;
+      users?:IUser[];
       lastSeen?: Date | string;
       count?: number;
     } = {
@@ -157,6 +158,7 @@ export const getChat = catchAsync(
       chatToSend._id = chat._id;
       chatToSend.lastSeen = otherUser.lastSeen || "";
       chatToSend.count = 0;
+      chatToSend.users=chat.users as IUser[];
     }
     const messages: IMessage[] = await Message.find({
       chat: chat?._id,

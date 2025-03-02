@@ -10,7 +10,7 @@ interface Props {
   setMessageOption: React.Dispatch<React.SetStateAction<Message | null>>;
 }
 const MessageCardOptions: React.FC<Props> = ({ messageOption, setMessageOption }) => {
-  const { setShowPopup } = useGlobalState();
+  const { setMessagePopup,dark } = useGlobalState();
   
   return (
     <Box
@@ -20,8 +20,9 @@ const MessageCardOptions: React.FC<Props> = ({ messageOption, setMessageOption }
       top={"10px"}
       zIndex={20}
       className="messageOption"
-      background={"#233138"}
-      transition={"all .5s"}
+      background={dark?"#233138":"#ffffff"}
+      boxShadow={!dark?"md":"none"}
+            transition={"all .5s"}
     >
       <ul className="option-ul">
   
@@ -29,7 +30,7 @@ const MessageCardOptions: React.FC<Props> = ({ messageOption, setMessageOption }
           className="option-item"
           onClick={(e) => {
             e.stopPropagation();
-            if (messageOption) setShowPopup(messageOption._id);
+            if (messageOption) setMessagePopup(messageOption);
             setMessageOption(null);
           }}
         >

@@ -5,10 +5,11 @@ import React, { useEffect, useState, useMemo } from "react";
 import { chatBoxProps, Message } from "@/app/types/allTypes";
 import { FaChevronDown } from "react-icons/fa";
 import MessageCardOptions from "./MessageCardOptions";
+import { FaBan } from "react-icons/fa6";
 
 const ChatBox: React.FC<chatBoxProps> = ({ messages, boxRef }) => {
   const { dark, user } = useGlobalState();
-  const [messageOption, setMessageOption] = useState<Message|null>(null);
+  const [messageOption, setMessageOption] = useState<Message | null>(null);
   const myId = user?._id;
   useEffect(() => {
     if (boxRef.current) {
@@ -16,12 +17,10 @@ const ChatBox: React.FC<chatBoxProps> = ({ messages, boxRef }) => {
     }
   }, [messages]);
 
-  const toggleOptions = (message:Message) => {
-    if(!messageOption)
-    setMessageOption(message);
-  else  setMessageOption(null);
+  const toggleOptions = (message: Message) => {
+    if (!messageOption) setMessageOption(message);
+    else setMessageOption(null);
 
-    console.log("e");
   };
 
   return (
@@ -54,18 +53,33 @@ const ChatBox: React.FC<chatBoxProps> = ({ messages, boxRef }) => {
               }`}
               key={message?._id}
             >
-              {messageOption?._id===message?._id && (
+              {messageOption?._id === message?._id && (
                 <MessageCardOptions
                   messageOption={messageOption}
                   setMessageOption={setMessageOption}
                 />
               )}
-              <p>{message?.content} </p>
+              {!message?.deletedForEveryone ? (
+                <p>{message?.content} </p>
+              ) : (
+                <p style={{ color: "#667781" }}>
+                  <span
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent:'center',
+                      gap: "2px",
+                    }}
+                  >
+                    <FaBan /> Message deleted.
+                  </span>
+                </p>
+              )}
               <span className="message-time">{createdAt}</span>
               <FaChevronDown
                 color="#aebac1"
-style={{display:"none"}}
-                onClick={(e)=>{
+                className="downIcon message-down-icon"
+                onClick={(e) => {
                   e?.stopPropagation();
                   toggleOptions(message);
                 }}

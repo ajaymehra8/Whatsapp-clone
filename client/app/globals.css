@@ -133,14 +133,17 @@ a {
   background: var(--other-user-message-bg);
 }
 .other-user-message .messageOption{
-right: -160%;
+  right: 0; /* Aligns it to the left corner */
+  transform: translateX(100%); /* Moves it outside the bubble */
+
 }
 .user-message {
   background: var(--user-message-bg);
   align-self: flex-end;
 }
 .user-message .messageOption{
-  left: -160%;
+  left: 0; /* Aligns it to the left corner */
+  transform: translateX(-100%); /* Moves it outside the bubble */
   }
 .message-time {
   align-self: flex-end;
@@ -339,6 +342,7 @@ transform: scale(1);  }
 /* MESSAGE STYLE START */
 
 .message-down-icon{
+  display: none;
 position: absolute;
 right: 3%;
 top:20%;
