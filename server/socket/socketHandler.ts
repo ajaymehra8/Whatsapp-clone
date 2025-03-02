@@ -1,9 +1,39 @@
 import { Server, Socket } from "socket.io";
-import User, { IUser } from "../model/userModel";
+import User from "../model/userModel";
 import mongoose from "mongoose";
 
 const users: Map<string, string> = new Map();
 
+// types
+interface Message {
+  _id: string; // Assuming MongoDB ObjectId is a string
+  sender: string; // User ID of the sender
+  content: string;
+  createdAt: string; // ISO Date string
+  chat: string;
+  deletedFor?: string[];
+}
+interface UserType {
+  name: string;
+  email: string;
+  image: {
+    name: string;
+    link: string;
+  };
+  lastSeen?: Date;
+  _id: string;
+};
+interface ChatType{
+      name?: string | undefined;
+      image?: { name: string; link: string };
+      messages?: Message[];
+      topMessage?:Message|null;
+      _id?: mongoose.Types.ObjectId | undefined;
+      userId?:string | undefined;
+      lastSeen?: Date | string;
+      count?: number;
+      users?: (UserType)[]; // Allow both ObjectId & User document
+    };
 const socketHandler = (io: Server) => {
   io.on("connection", (socket: Socket) => {
     console.log(`🟢 User connected: ${socket.id}`);
@@ -46,31 +76,36 @@ const socketHandler = (io: Server) => {
 // HANDLE NEW CHAT
 socket.on(
   "new_chat",
-  (chat: {users: IUser[], sender: string  }) => {
-const sender=chat.sender;
+  (chat:ChatType) => {
+const sender=chat.topMessage?.sender;
+console.log(sender);
     if (!chat.users || !Array.isArray(chat.users)) {
       return console.error("chat.users is not defined or not an array");
     }
-
-    chat.users.forEach((user: IUser) => {
+    const senderUser = chat?.users?.find(user => user._id === sender);
+    chat.name=senderUser?.name;
+    chat.image=senderUser?.image;
+    chat.lastSeen=senderUser?.lastSeen;
+    chat.userId=senderUser?._id;
+    chat.users.forEach((user: UserType) => {
       if (user._id.toString() !== sender) {
         const receiverSocketId = users.get(user._id.toString());
+        
         if (receiverSocketId) {
           io.to(receiverSocketId).emit("new_chat", chat);
         }
       }
+      
     });
   }
 );
     socket.on("typing", (room) => {
-      console.log("typing back");
       if (room?._id) {
         socket.to(room._id).emit("typing", room);
       }
     });
 
     socket.on("stop_typing", (room) => {
-      console.log("stop typing back");
 
       if (room?._id) {
         socket.to(room._id).emit("stop_typing", room);

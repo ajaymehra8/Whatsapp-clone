@@ -97,7 +97,6 @@ const Setting = () => {
         >
           <Avatar.Root
             size={"lg"}
-            bg={"blue"}
             cursor={"pointer"}
           
               width={{sm:"clamp(80px,80vw,85px)",md:"clamp(30px,10vw,85px)"}}

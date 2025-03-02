@@ -37,6 +37,7 @@ export const doMessage = catchAsync(
       name?: string | undefined;
       image?: { name: string; link: string };
       messages?: IMessage[];
+      topMessage?:IMessage|null;
       _id?: mongoose.Types.ObjectId | undefined;
       userId?: mongoose.Types.ObjectId | undefined;
       lastSeen?: Date | string;
@@ -66,7 +67,6 @@ export const doMessage = catchAsync(
 
       chatToSend.users = chat?.users;
     } else {
-      console.log("coming here");
       const otherUser =
         chat.users[0]._id.toString() === userId.toString()
           ? chat.users[1] as IUser
@@ -99,10 +99,12 @@ export const doMessage = catchAsync(
     if(newChat && isDeleted){
 const allMessages:(IMessage)[]=await Message.find({chat:chat?._id}).populate("chat");
 chatToSend.messages=allMessages;
+chatToSend.topMessage=message;
 chatToSend.count=0;
     } else if (newChat) {
       if (message) {
         chatToSend.messages = [message];
+        chatToSend.topMessage=message;
         chatToSend.count = 0;
       } else {
         chatToSend.messages = [];
