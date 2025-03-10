@@ -145,24 +145,26 @@ const UserDetails: React.FC<PropType> = () => {
         </Box>
       </Box>
 
-      <Box
-        width={{ base: "100%", md: "100%" }}
-        minH={"3vh"}
-        paddingTop={"15px"}
-        background={dark ? "#111b21" : "#ffffff"}
-        overflow={"hidden"}
-        paddingBottom={"15px"}
-        display={"flex"}
-        alignItems={"flex-start"}
-        justifyContent={"center"}
-        flexDirection={"column"}
-        gap={"5px"}
-        lineHeight={1.2}
-        paddingLeft={"9%"}
-      >
-        <h4 style={{ color: "#8696a0" }}>About</h4>
-        <p>{user?.about?.content}</p>
-      </Box>
+      {user?.about?.visibility && (
+        <Box
+          width={{ base: "100%", md: "100%" }}
+          minH={"3vh"}
+          paddingTop={"15px"}
+          background={dark ? "#111b21" : "#ffffff"}
+          overflow={"hidden"}
+          paddingBottom={"15px"}
+          display={"flex"}
+          alignItems={"flex-start"}
+          justifyContent={"center"}
+          flexDirection={"column"}
+          gap={"5px"}
+          lineHeight={1.2}
+          paddingLeft={"9%"}
+        >
+          <h4 style={{ color: "#8696a0" }}>About</h4>
+          <p>{user?.about?.content}</p>
+        </Box>
+      )}
 
       <Box
         width={{ base: "100%", md: "100%" }}
