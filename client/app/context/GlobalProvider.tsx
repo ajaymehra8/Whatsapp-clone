@@ -37,9 +37,8 @@ interface GlobalContextType {
   setOtherUserId: React.Dispatch<React.SetStateAction<string>>;
   showPopup: string;
   setShowPopup: React.Dispatch<React.SetStateAction<string>>;
-  messagePopup:Message|null;
-  setMessagePopup: React.Dispatch<React.SetStateAction<Message|null>>;
-
+  messagePopup: Message | null;
+  setMessagePopup: React.Dispatch<React.SetStateAction<Message | null>>;
 }
 
 // Create context with a default value
@@ -53,14 +52,13 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
   const [dark, setDark] = useState<boolean>(false);
   const [otherUserId, setOtherUserId] = useState<string>("");
   const [showPopup, setShowPopup] = useState<string>("");
-  const [messagePopup, setMessagePopup] = useState<Message|null>(null);
+  const [messagePopup, setMessagePopup] = useState<Message | null>(null);
 
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setDark(window.matchMedia("(prefers-color-scheme: dark)").matches);
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (typeof window !== "undefined") {
+  //     setDark(window.matchMedia("(prefers-color-scheme: dark)").matches);
+  //   }
+  // }, []);
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const [user, setUser] = useState<any>(null);
   const [token, setToken] = useState<any>(null);
@@ -69,18 +67,18 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
   const socket = getSocket(); // Initialize socket
 
   // Listen for system theme changes
+  const handleChange = () => {
+    if (localStorage.getItem("theme")) {
+      const value = localStorage.getItem("theme");
+      if (value === "dark") {
+        setDark(true);
+      } else {
+        setDark(false);
+      }
+    }
+  };
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-
-    const handleChange = (e: MediaQueryListEvent) => {
-      setDark(e.matches);
-    };
-
-    mediaQuery.addEventListener("change", handleChange);
-
-    return () => {
-      mediaQuery.removeEventListener("change", handleChange);
-    };
+    handleChange();
   }, []);
 
   const fetchUserDetails = async () => {
@@ -104,6 +102,16 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
     fetchUserDetails();
   }, []);
 
+  useEffect(() => {
+    if (dark) {
+      localStorage.setItem("theme", "dark");
+    } else {
+      localStorage.setItem("theme", "light");
+    }
+    document.body.classList.toggle("dark", dark);
+    document.body.classList.toggle("light", !dark);
+  }, [dark]);
+
   // Emit "setup" event when the user is available and socket is ready
   useEffect(() => {
     if (user && socket) {
@@ -119,8 +127,14 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
         if (selectedChat?.userId === data.userId) {
           console.log(selectedChat);
           setSelectedChat((prevSelectedChat: ChatType | null) =>
-            prevSelectedChat !== null
-              ? { ...prevSelectedChat, lastSeen: data.lastSeen }
+            prevSelectedChat
+              ? {
+                  ...prevSelectedChat,
+                  lastSeen: {
+                    ...prevSelectedChat.lastSeen,
+                    time: data.lastSeen,
+                  },
+                }
               : null
           );
         }
@@ -187,7 +201,7 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
         showPopup,
         setShowPopup,
         messagePopup,
-        setMessagePopup
+        setMessagePopup,
       }}
     >
       {children}

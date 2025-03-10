@@ -1,11 +1,12 @@
+import { useGlobalState } from "@/app/context/GlobalProvider";
 import { Box } from "@chakra-ui/react";
 import { ReactNode } from "react";
 
 interface FlexLayoutProps {
-    children: ReactNode;
-  }
+  children: ReactNode;
+}
 
-const FlexLayout = ({children}:FlexLayoutProps) => {
+const FlexLayout = ({ children }: FlexLayoutProps) => {
   return (
     <Box
       display={"flex"}
@@ -13,7 +14,6 @@ const FlexLayout = ({children}:FlexLayoutProps) => {
       minH={"100vh"}
       alignItems={"center"}
       justifyContent={"center"}
-
     >
       {children}
     </Box>

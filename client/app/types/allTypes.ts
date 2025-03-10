@@ -27,22 +27,25 @@ export interface ChatType {
   topMessage: Message;
   userId: string;
   count: number;
-  lastSeen?: Date | string;
+  lastSeen?: {time:Date|string,visibility?:boolean};
   messages: Message[];
   image?: {
     name: string;
     link: string;
+    visibility?:boolean
   };
   isPinned: boolean;
 }
 export interface UserType {
   name: string;
   email: string;
-  image: {
+  image?: {
     name: string;
     link: string;
+    visibility?:boolean
   };
-  lastSeen?: Date;
+  lastSeen?: {time:Date|string,visibility:boolean};
   _id: string;
+  about?:{content:string,visibility:boolean};
 }
 

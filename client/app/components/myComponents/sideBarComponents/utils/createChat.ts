@@ -10,7 +10,7 @@ export const createChat = (chats: any, userId: string) => {
       _id:chat?._id,
       userId:otherUser?._id,
       name: otherUser.name,
-      image: {name:otherUser.image.name,link:otherUser.image.link},
+      image: otherUser.image,
       topMessage: chat.topMessage,
       lastSeen:chat.lastSeen||"not",
       count:chat.count||0,
@@ -29,7 +29,7 @@ export const createSingleChat= (chat: any, userId: string) => {
     _id:chat?._id,
     userId:otherUser?._id,
     name: otherUser.name,
-    image: {name:otherUser.image.name,link:otherUser.image.link},
+    image: otherUser.image,
     topMessage: chat.topMessage,
     lastSeen:chat.lastSeen||"not",
     count:chat.count||0

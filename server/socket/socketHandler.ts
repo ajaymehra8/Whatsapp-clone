@@ -151,7 +151,7 @@ console.log(sender);
         try {
           await User.findByIdAndUpdate(
             new mongoose.Types.ObjectId(userId),
-            { lastSeen: new Date() },
+            { lastSeen: {time:new Date()} },
             { new: true }
           );
         } catch (error) {

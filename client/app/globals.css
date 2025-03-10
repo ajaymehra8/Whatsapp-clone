@@ -1,4 +1,4 @@
-:root {
+.light {
   --background: #ffffff;
   --foreground: #171717;
   --line-color: #e9edef;
@@ -13,7 +13,22 @@
   --other-user-message-bg: #fff;
   --border-color:#e9edef;
 }
-
+.dark{
+  --background: #111b21;
+  --foreground: #ededed;
+  --line-color: #222d34;
+  --scrollbar-background: #111b21;
+  --scrollbar-thumb: #374045;
+  --rounded-btn-bg: #202c33;
+  --rounded-btn-color: gray;
+  --rounded-btn-clicked-bg: #0a332c;
+  --rounded-btn-clicked-color: #00a86d;
+  --rounded-btn-hover-bg: #2a3942;
+  --user-message-bg: #005c4b;
+  --other-user-message-bg: #202c33;
+  --notification-color: #00a884;
+  --border-color:#46555f;
+}
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #111b21;
@@ -352,6 +367,20 @@ cursor: pointer;
 /* MESSAGE STYLE END */
 .downIcon{
   display: none;
+}
+.select{
+  border: none;
+  outline: none;
+  background: var(--background);
+  cursor: pointer;
+}
+.option{
+  border: none;
+  outline: none;
+}
+.option:focus{
+  border: none;
+  outline: none;
 }
 @media (width<770px) {
   .backBtn {

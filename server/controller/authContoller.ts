@@ -67,6 +67,7 @@ export const login = catchAsync(
       return;
     }
     user.password=undefined;
+    console.log(user);
     res.status(200).json({
       success: true,
       jwt,

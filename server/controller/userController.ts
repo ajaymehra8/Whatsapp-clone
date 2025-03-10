@@ -97,6 +97,14 @@ res.status(200).json({
 
 type updateBody = {
   name?: string;
+  about: {content?:string};
+  image?: {
+    name: string;
+    link: string;
+  };
+};
+type reqBody = {
+  name?: string;
   about?: string;
   image?: {
     name: string;
@@ -108,8 +116,7 @@ type updateBody = {
 
 export const updateProfile = catchAsync(
   async (req: MyRequest, res: Response, next: NextFunction) => {
-    const { name, about, image } = req.body as updateBody;
-    console.log(name, about,image);
+    const { name, about, image } = req.body as reqBody;
     let userId;
     if (req.user) {
       console.log(req.user);
@@ -118,7 +125,7 @@ export const updateProfile = catchAsync(
     console.log(userId);
 
     userId = new mongoose.Types.ObjectId(userId);
-    const field: updateBody = {};
+    const field: updateBody = {about:{}};
     if (!name && !about && !image) {
       next(new AppError(400, "No value provided for updation"));
       return;
@@ -127,7 +134,8 @@ export const updateProfile = catchAsync(
       field.name = name;
     }
     if (about) {
-      field.about = about;
+      
+      field.about.content = about;
     }
     if (image) {
       field.image={
@@ -154,3 +162,82 @@ export const updateProfile = catchAsync(
   }
 );
 
+// change user privacy settings
+
+export const changePrivacy=catchAsync(async(req:MyRequest,res:Response,next:NextFunction)=>{
+  const {lastSeen,about,image}=req.body;
+  console.log(lastSeen,about,image);
+  console.log(req.user);
+let userId=req.user?.id;
+  if(!lastSeen && !about && !image){
+    next(new AppError(400,"No changes"));
+    return;
+  }
+  if(lastSeen){
+    let value:boolean;
+    console.log("working")
+    if(lastSeen==="everyone"){
+      value=true;
+    }else{
+      value=false
+    }
+    userId=new mongoose.Types.ObjectId(userId);
+   const user:IUser|null= await User.findByIdAndUpdate(userId,{
+    "lastSeen.visibility":value,
+    },{new:true});
+    if(!user){
+      next(new AppError(404,"No user found"));
+      return;
+    }
+    res.status(200).json({
+      success:true,
+      message:"LastSeen updated",
+    user
+    });
+    return;
+  }
+  
+  if(about){
+    let value:boolean;
+    if(about==="everyone"){
+      value=true;
+    }else{
+      value=false
+    }
+   const user:IUser|null= await User.findByIdAndUpdate(userId,{
+    "about.visibility":value,
+    },{new:true});
+    if(!user){
+      next(new AppError(404,"No user found"));
+      return;
+    }
+    res.status(200).json({
+      success:true,
+      message:"About visibility updated",
+      user
+    });
+    return;
+  }
+
+  if(image){
+    let value:boolean;
+    if(image==="everyone"){
+      value=true;
+    }else{
+      value=false
+    }
+   const user:IUser|null= await User.findByIdAndUpdate(userId,{
+    "image.visibility":value,
+    },{new:true});
+    if(!user){
+      next(new AppError(404,"No user found"));
+      return;
+    }
+    res.status(200).json({
+      success:true,
+      message:"Image visibility updated",
+      user
+    });
+    return;
+  }
+})

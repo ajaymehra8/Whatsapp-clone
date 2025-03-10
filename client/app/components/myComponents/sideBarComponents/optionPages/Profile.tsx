@@ -68,7 +68,7 @@ const Profile: React.FC<PropType> = ({ option }) => {
       setName(user.name);
     }
     if (user) {
-      setAbout(user?.about || "On Whatsapp");
+      setAbout(user?.about?.content || "On Whatsapp");
       setImgSrc(user?.image?.link || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvodrlyTZzayZIVYMNDeGx_vAKPj8-Br7Z6Q&s");
     }
   }, [user]); // Runs when `user` changes
@@ -215,7 +215,7 @@ const Profile: React.FC<PropType> = ({ option }) => {
           label="About"
           value={about}
           setValue={setAbout}
-          userValue={user?.about || "On Whatsapp"}
+          userValue={user?.about?.content || "On Whatsapp"}
           maxLength={50}
         />
 
