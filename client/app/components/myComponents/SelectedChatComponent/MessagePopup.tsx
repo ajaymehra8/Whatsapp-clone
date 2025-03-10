@@ -124,11 +124,12 @@ const MessagePopup = () => {
         className="bottom-btns"
         style={{ flexDirection: "column", gap: "20px", alignItems: "flex-end" }}
       >
-        {user?._id === messagePopup?.sender && (
-          <button className="confirm-btn" onClick={handleDeleteForEveryone}>
-            Delete for everyone
-          </button>
-        )}
+        {user?._id === messagePopup?.sender &&
+          !messagePopup?.deletedForEveryone && (
+            <button className="confirm-btn" onClick={handleDeleteForEveryone}>
+              Delete for everyone
+            </button>
+          )}
         <button className="confirm-btn" onClick={handleDeleteForMe}>
           Delete for me
         </button>

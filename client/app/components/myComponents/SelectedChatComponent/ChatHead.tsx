@@ -82,9 +82,9 @@ const ChatHead = () => {
         >
           <Avatar.Fallback name={selectedChat?.name} />
           <Avatar.Image
-            src={
-              selectedChat?.image?.link ||
-              "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvodrlyTZzayZIVYMNDeGx_vAKPj8-Br7Z6Q&s"
+            src={   selectedChat?.image?.visibility
+              ? selectedChat?.image?.link
+              : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvodrlyTZzayZIVYMNDeGx_vAKPj8-Br7Z6Q&s"
             }
           />
         </Avatar.Root>
@@ -112,7 +112,7 @@ const ChatHead = () => {
           >
             {onlineUsers.includes(selectedChat?.userId || selectedChat?._id)
               ? ((isTyping && isTyping._id===selectedChat._id)? "typing..." : "Online")
-              : ((isTyping&& isTyping._id===selectedChat._id) ? "typing..." : `last seen ${formatTimestamp(selectedChat?.lastSeen)}`)}{" "}
+              : ((!selectedChat?.lastSeen?.visibility) ? "" : `last seen ${formatTimestamp(selectedChat?.lastSeen?.time)}`)}{" "}
           </p>
         </div>
       </Box>

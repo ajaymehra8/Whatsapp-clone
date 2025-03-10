@@ -40,7 +40,7 @@ export const doMessage = catchAsync(
       topMessage?: IMessage | null;
       _id?: mongoose.Types.ObjectId | undefined;
       userId?: mongoose.Types.ObjectId | undefined;
-      lastSeen?: Date | string;
+      lastSeen?: {time:Date ,visibility?:boolean}|undefined|string;
       count?: number;
       users?: (mongoose.Types.ObjectId | IUser)[]; // Allow both ObjectId & User document
     } = {};

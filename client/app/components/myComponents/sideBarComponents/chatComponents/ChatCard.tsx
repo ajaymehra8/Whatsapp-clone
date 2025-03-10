@@ -127,8 +127,9 @@ const ChatCard = ({ chat }: { chat: any }) => {
           <Avatar.Fallback name={chat?.name} />
           <Avatar.Image
             src={
-              chat?.image?.link ||
-              "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvodrlyTZzayZIVYMNDeGx_vAKPj8-Br7Z6Q&s"
+              chat?.image?.visibility
+                ? chat?.image?.link
+                : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvodrlyTZzayZIVYMNDeGx_vAKPj8-Br7Z6Q&s"
             }
           />
         </Avatar.Root>

@@ -7,9 +7,10 @@ export interface IUser extends Document {
   name: string;
   email: string;
   password: string | undefined;
-  image?: { link: string; name: string };
-  lastSeen?: Date;
-  about?: string;
+  image?: { link: string; name: string; visibility: boolean };
+  lastSeen?: { time: Date; visibility: boolean };
+  about: { content: string; visibility: boolean };
+  blockedUsers?: mongoose.Types.ObjectId[];
   // Add the method to the interface
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
@@ -42,13 +43,34 @@ const userSchema: Schema<IUser> = new mongoose.Schema<IUser>(
         default:
           "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvodrlyTZzayZIVYMNDeGx_vAKPj8-Br7Z6Q&s",
       },
+      visibility: {
+        type: Boolean,
+        default: true,
+      },
     },
     lastSeen: {
-      type: Date,
+      time: {
+        type: Date,
+      },
+      visibility: {
+        type: Boolean,
+        default: true,
+      },
     },
     about: {
-      type: String,
+      type: {
+        content: { type: String, default: "New on whatsapp" },
+        visibility: { type: Boolean, default: true },
+      },
+      default: { content: "New on whatsapp", visibility: true },
     },
+
+    blockedUsers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   { timestamps: true }
 );

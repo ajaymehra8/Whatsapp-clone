@@ -124,7 +124,7 @@ export const getChat = catchAsync(
       _id: mongoose.Types.ObjectId | undefined;
       userId?: mongoose.Types.ObjectId | undefined;
       users?:IUser[];
-      lastSeen?: Date | string;
+      lastSeen?: {time:Date ,visibility?:boolean}|undefined|string;
       count?: number;
     } = {
       name: "",
