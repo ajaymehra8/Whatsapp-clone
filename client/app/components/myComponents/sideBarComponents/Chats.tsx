@@ -42,6 +42,7 @@ const Chats = () => {
         const { data } = await getAllChats();
 
         const chats = createChat(data.chats, user?._id);
+        console.log(chats);
         chats.sort((a: ChatType, b: ChatType) => {
           // Move pinned chats to the top
           if (a.isPinned !== b.isPinned) {
@@ -57,6 +58,7 @@ const Chats = () => {
         setChats(chats);
       } catch (err) {
         if (err instanceof AxiosError) {
+          console.log(err);
           toaster.create({
             title: err?.response?.data?.message || "Problem in fetching chats",
             description: "Try again",

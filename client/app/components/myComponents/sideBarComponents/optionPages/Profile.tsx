@@ -161,13 +161,13 @@ const Profile: React.FC<PropType> = ({ option }) => {
             borderRadius={"50%"}
             position={"absolute"}
             top={"0"}
-            background={"rgba(0, 0, 0, 0.5)"} // Set background with opacity
+            background={"rgba(0, 0, 0, 0.5)"} 
             display={"flex"}
             alignItems={"center"}
             justifyContent={"center"}
-            pointerEvents="none" // Prevent interaction when hidden
-            transition="opacity 0.3s ease, transform 0.3s ease" // Smooth animation
-            transform="scale(0.9)" // Start smaller for animation effect
+            pointerEvents="none" 
+            transition="opacity 0.3s ease, transform 0.3s ease" 
+            transform="scale(0.9)" 
             style={{
               pointerEvents: "none",
             }}
