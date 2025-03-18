@@ -58,7 +58,6 @@ const OptionCard: React.FC<PropType> = ({ setting }) => {
         });
       } else if (setting.name === "About") {
         const { data } = await changePrivacy(null, null, event.target.value);
-        console.log(data.value)
         setUser(data.user);
         localStorage.setItem("user",JSON.stringify(data.user));
 

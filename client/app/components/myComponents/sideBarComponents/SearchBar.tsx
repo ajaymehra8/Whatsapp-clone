@@ -7,34 +7,46 @@ import { IoMdSearch } from "react-icons/io";
 import { toaster } from "../../ui/toaster";
 import { AxiosError } from "axios";
 import { createChat } from "./utils/createChat";
+import { ChatType } from "@/app/types/allTypes";
 
 interface SearchBarProps {
   setChats: React.Dispatch<React.SetStateAction<any>>;
   setNoItemText: React.Dispatch<React.SetStateAction<string>>;
   setSearchChats?: React.Dispatch<React.SetStateAction<any>>;
-
+  onlyUser?: boolean;
+  group?: ChatType;
 }
-const SearchBar: React.FC<SearchBarProps> = ({ setChats, setNoItemText }) => {
+const SearchBar: React.FC<SearchBarProps> = ({
+  setChats,
+  setNoItemText,
+  onlyUser = false,
+  group
+}) => {
   const { dark, setFetchAgain, fetchAgain, user } = useGlobalState();
   const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
       if (e.target.value.length < 1) {
         setChats([]);
+        if (onlyUser) {
+          setNoItemText("No user searched.");
+          return;
+        }
         setNoItemText("No chats, yet.");
 
         setFetchAgain(!fetchAgain);
-        
+
         return;
       }
-      const { data } = await users(e.target.value);
-      if (data.users.length < 1 && data.oneToOneChats.length<1) {
-        setNoItemText("No user or email found.");
-      }
-      setNoItemText("");
-      if (data.success) {
+      const { data } = await users(e.target.value, onlyUser,group);
 
+      if (data.users.length < 1 && data.oneToOneChats.length < 1) {
+        setChats([]);
+        setNoItemText("No user or email found.");
+        return;
+      }
+      if (data.success) {
         const oneToOneChats = createChat(data.oneToOneChats, user?._id);
-        setChats([...oneToOneChats,...data.users]);
+        setChats([...oneToOneChats, ...data.users]);
       }
     } catch (err) {
       if (err instanceof AxiosError)
@@ -70,7 +82,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ setChats, setNoItemText }) => {
           }}
         />
         <Input
-          placeholder="Search"
+          placeholder="Search name or email"
           variant="outline"
           borderRadius={"10px"}
           background={dark ? "#202c33" : "#f0f2f5"}

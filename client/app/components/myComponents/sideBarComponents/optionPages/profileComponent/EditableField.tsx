@@ -5,12 +5,14 @@ import { Avatar, Box } from "@chakra-ui/react";
 import { useState, useRef } from "react";
 import { HiPencil } from "react-icons/hi";
 interface EditableFieldProp {
-  label: string;
+  label?: string;
   value: string;
   setValue: React.Dispatch<React.SetStateAction<string>>;
+  setChange?: React.Dispatch<React.SetStateAction<boolean>>;
+
   userValue: string;
   maxLength: number;
-
+  width?: string;
 }
 const EditableField: React.FC<EditableFieldProp> = ({
   label,
@@ -18,37 +20,44 @@ const EditableField: React.FC<EditableFieldProp> = ({
   setValue,
   userValue,
   maxLength = 20,
+  width = "100%",
+  setChange,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [widthState, setWidthState] = useState(width);
   const handleEditClick = () => {
     if (isEditing) {
-      setValue(userValue || value);
-  
+      setWidthState(width);
+
+      setValue(value || userValue);
     } else {
-      setTimeout(() => inputRef.current?.focus(), 0); 
+      setWidthState("100%");
+      setTimeout(() => inputRef.current?.focus(), 0);
     }
     setIsEditing(!isEditing);
   };
   return (
-    <Box lineHeight={"1.8"} width={"100%"} marginTop={"3vh"}>
-      <p className="label">{label}</p>
+    <Box lineHeight={"1.8"} width={widthState} marginTop={"3vh"}>
+      {label && <p className="label">{label}</p>}
       <Box
         display={"flex"}
         justifyContent={"space-between"}
         alignItems={"center"}
       >
         <input
-                  ref={inputRef}
-
           type="text"
+          ref={inputRef}
           disabled={!isEditing}
           value={value}
-          maxLength={maxLength}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={(e) => {
+            setValue(e.target.value);
+            if (setChange) setChange(true);
+          }}
           className={
             isEditing ? "active-profile-input profile-input" : "profile-input"
           }
+          maxLength={maxLength}
         />
         <HiPencil
           size={"25px"}

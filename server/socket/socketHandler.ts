@@ -8,14 +8,6 @@ const users: Map<string, string> = new Map();
 interface SingleChat {
   _id: string;
 }
-interface Message {
-  _id: string; // Assuming MongoDB ObjectId is a string
-  sender: string; // User ID of the sender
-  content: string;
-  createdAt: string; // ISO Date string
-  chat: SingleChat;
-  deletedFor?: string[];
-}
 interface UserType {
   name: string;
   email: string;
@@ -25,18 +17,30 @@ interface UserType {
   };
   lastSeen?: Date;
   _id: string;
-};
-interface ChatType{
-      name?: string | undefined;
-      image?: { name: string; link: string };
-      messages?: Message[];
-      topMessage?:Message|null;
-      _id?: mongoose.Types.ObjectId | undefined;
-      userId?:string | undefined;
-      lastSeen?: Date | string;
-      count?: number;
-      users?: (UserType)[]; // Allow both ObjectId & User document
-    };
+}
+interface Message {
+  _id: string; // Assuming MongoDB ObjectId is a string
+  sender: UserType; // User ID of the sender
+  content: string;
+  createdAt: string; // ISO Date string
+  chat: SingleChat;
+  deletedFor?: string[];
+}
+
+interface ChatType {
+  name?: string;
+  groupName?:string;
+  image?: { name: string; link: string };
+  messages?: Message[];
+  topMessage?: Message | null;
+  _id?: mongoose.Types.ObjectId | undefined;
+  userId?: string | undefined;
+  lastSeen?: Date | string;
+  count?: number;
+  groupAdmin?: string;
+  isGroupedChat?: boolean;
+  users: UserType[]; // Allow both ObjectId & User document
+}
 const socketHandler = (io: Server) => {
   io.on("connection", (socket: Socket) => {
     console.log(`🟢 User connected: ${socket.id}`);
@@ -58,16 +62,15 @@ const socketHandler = (io: Server) => {
     // Handle new messages
     socket.on(
       "send_message",
-      (data: { chat: { users: string[] }; sender:string }) => {
-
+      (data: { chat: { users: string[] }; sender: { _id: string } }) => {
         const { chat, sender } = data;
-
+        console.log(chat, sender);
         if (!chat.users || !Array.isArray(chat.users)) {
           return console.error("chat.users is not defined or not an array");
         }
 
         chat.users.forEach((userId: string) => {
-          if (userId !== sender) {
+          if (userId !== sender._id) {
             const receiverSocketId = users.get(userId);
             if (receiverSocketId) {
               io.to(receiverSocketId).emit("message_received", data);
@@ -79,12 +82,11 @@ const socketHandler = (io: Server) => {
     // Handle message delete for everyone
     socket.on(
       "message_deleted",
-      ({chat,message}:{chat:ChatType,message:Message}) => {
-
-       const sender=message.sender;
-       console.log(chat);
+      ({ chat, message }: { chat: ChatType; message: Message }) => {
+        const sender = message.sender;
+        console.log(chat);
         chat.users?.forEach((user: UserType) => {
-          if (user?._id !== sender) {
+          if (user?._id !== sender?._id) {
             const receiverSocketId = users.get(user?._id);
             if (receiverSocketId) {
               console.log("emited");
@@ -94,32 +96,35 @@ const socketHandler = (io: Server) => {
         });
       }
     );
-// HANDLE NEW CHAT
-socket.on(
-  "new_chat",
-  (chat:ChatType) => {
-const sender=chat.topMessage?.sender;
-console.log(sender);
-    if (!chat.users || !Array.isArray(chat.users)) {
-      return console.error("chat.users is not defined or not an array");
-    }
-    const senderUser = chat?.users?.find(user => user._id === sender);
-    chat.name=senderUser?.name;
-    chat.image=senderUser?.image;
-    chat.lastSeen=senderUser?.lastSeen;
-    chat.userId=senderUser?._id;
-    chat.users.forEach((user: UserType) => {
-      if (user._id.toString() !== sender) {
-        const receiverSocketId = users.get(user._id.toString());
-        
-        if (receiverSocketId) {
-          io.to(receiverSocketId).emit("new_chat", chat);
-        }
+    // HANDLE NEW CHAT
+    socket.on("new_chat", (chat: ChatType) => {
+      let sender;
+      if (chat.isGroupedChat) {
+        sender = chat.groupAdmin;
+      } else {
+        sender = chat.topMessage?.sender;
       }
-      
+      console.log(chat.users);
+      if (!chat.users || !Array.isArray(chat.users)) {
+        return console.error("chat.users is not defined or not an array");
+      }
+      if (!chat.isGroupedChat) {
+        const senderUser = chat?.users?.find((user) => user._id === sender);
+        chat.name = senderUser?.name;
+        chat.image = senderUser?.image;
+        chat.lastSeen = senderUser?.lastSeen;
+        chat.userId = senderUser?._id;
+      } 
+      chat.users?.forEach((user: UserType) => {
+        if (user._id.toString() !== sender) {
+          const receiverSocketId = users.get(user._id.toString());
+
+          if (receiverSocketId) {
+            io.to(receiverSocketId).emit("new_chat", chat);
+          }
+        }
+      });
     });
-  }
-);
     socket.on("typing", (room) => {
       if (room?._id) {
         socket.to(room._id).emit("typing", room);
@@ -127,7 +132,6 @@ console.log(sender);
     });
 
     socket.on("stop_typing", (room) => {
-
       if (room?._id) {
         socket.to(room._id).emit("stop_typing", room);
       }
@@ -151,7 +155,7 @@ console.log(sender);
         try {
           await User.findByIdAndUpdate(
             new mongoose.Types.ObjectId(userId),
-            { lastSeen: {time:new Date()} },
+            { lastSeen: { time: new Date() } },
             { new: true }
           );
         } catch (error) {

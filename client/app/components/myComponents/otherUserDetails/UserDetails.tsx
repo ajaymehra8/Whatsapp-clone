@@ -18,11 +18,11 @@ const UserDetails: React.FC<PropType> = () => {
   const { dark, otherUserId, setOtherUserId, setShowPopup, selectedChat } =
     useGlobalState();
   const [user, setUser] = useState<UserType | null>(null);
-  useEffect(() => {
-    if (selectedChat?.userId !== otherUserId) {
-      setOtherUserId("");
-    }
-  }, [selectedChat]);
+  // useEffect(() => {
+  //   if (selectedChat?.userId !== otherUserId) {
+  //     setOtherUserId("");
+  //   }
+  // }, [selectedChat]);
   const fetchUserDetails = useCallback(async () => {
     try {
       if (!otherUserId) {

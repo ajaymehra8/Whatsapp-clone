@@ -17,11 +17,11 @@ const MessageInput = () => {
     selectedChat,
     socket,
     setChats,
-    onlineUsers,
     setSelectedChat,
     isTyping,
     otherUserId,
-    setIsTyping,
+    showGroup,
+    user,
   } = useGlobalState();
   // const textareaRef = useRef<HTMLTextAreaElement>(null);
   // const mainBoxRef = useRef<HTMLDivElement>(null);
@@ -35,7 +35,6 @@ const MessageInput = () => {
 
   //   }
   // }, [message]);
-
   const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (socket) {
       setMessage(e.target.value);
@@ -56,24 +55,36 @@ const MessageInput = () => {
       try {
         if (!selectedChat) return;
         const { data } = await doMessage(selectedChat?._id, message);
-setMessage("");
+
         if (data.newChat) {
+          setChats((prevChats) => {
+            let pinnedChats = prevChats.filter((chat) => chat.isPinned);
+            const oldChats = prevChats.filter(
+              (c) => !c.isPinned && data.chat._id !== c._id
+            );
+
+            return [...pinnedChats, data.chat, ...oldChats];
+          });
           setSelectedChat(data.chat);
           socket.emit("new_chat", data.chat);
           socket.emit("join_chat", data.chat?._id); // Emit event to server
         } else {
+
           setSelectedChat((prevChat: ChatType | null) =>
             prevChat
-              ? {
-                  ...prevChat,
-                  messages: [...prevChat.messages, data.newMessage],
-                }
+              ? prevChat.messages
+                ? {
+                    ...prevChat,
+                    messages: [...prevChat.messages, data.newMessage],
+                  }
+                : {
+                    ...prevChat,
+                    messages: [data.newMessage],
+                  }
               : null
           );
         }
-        socket.emit("send_message", data.newMessage);
-        
-        // want to change from here
+
         setChats((prevChats: ChatType[]) => {
           if (!selectedChat) return prevChats; // Ensure selectedChat is defined
           const updatedChats = prevChats.map((chat) =>
@@ -110,8 +121,12 @@ setMessage("");
 
           return [...pinnedChats, updatedChat, ...oldChats];
         });
+
+        socket.emit("send_message", data.newMessage);
+        setMessage("");
+
+        // want to change from here
       } catch (err) {
-        console.log(err);
         if (err instanceof AxiosError) {
           toaster.create({
             title: err?.response?.data?.message || "Error in doing message",
@@ -119,8 +134,6 @@ setMessage("");
             type: "error",
           });
         }
-      } finally {
-        setMessage("");
       }
     }
   };
@@ -130,52 +143,67 @@ setMessage("");
       minHeight={"8vh"}
       maxHeight={"24vh"}
       background={dark ? "#202c33" : "#f0f2f5"}
-      width={{ base: "100%", md: otherUserId ? "35%" : "65%" }}
+      width={{ base: "100%", md: otherUserId || showGroup ? "35%" : "65%" }}
       justifyContent={"center"}
       alignItems={"center"}
       gap={3}
-      position={'fixed'}
-      paddingRight={{base:"20px",md:0}}
+      position={"fixed"}
+      paddingRight={{ base: "20px", md: 0 }}
       bottom={0}
     >
-      <IoIosAdd
-        size={"30px"}
-        cursor={"pointer"}
-        color={dark ? "#d1d7db" : "#3b4a54"}
-      />
+      {!selectedChat?.isGroupedChat ||
+      selectedChat?.users?.some((u) => u._id === user?._id) ? (
+        <>
+          <IoIosAdd
+            size={"30px"}
+            cursor={"pointer"}
+            color={dark ? "#d1d7db" : "#3b4a54"}
+          />
 
-      <textarea
-        style={{
-          width: "87%",
-          padding: "5px 10px",
-          borderRadius: "10px",
-          backgroundColor: dark ? "#2a3942" : "#ffffff",
-          maxHeight: "20vh",
-          height: "5.4vh",
-          overflowY: "auto",
-          overflowX: "hidden", // Prevent horizontal scrolling
-          resize: "none", // Prevent resizing if needed
-        }}
-        value={message}
-        onChange={handleMessageChange}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            // Call a function or handle the event
-            sendMessage();
-            setMessage("");
-          }
-        }}
-        placeholder="Type a message"
-        className="send-message-input"
-      ></textarea>
+          <textarea
+            style={{
+              width: "87%",
+              padding: "5px 10px",
+              borderRadius: "10px",
+              backgroundColor: dark ? "#2a3942" : "#ffffff",
+              maxHeight: "20vh",
+              height: "5.4vh",
+              overflowY: "auto",
+              overflowX: "hidden", // Prevent horizontal scrolling
+              resize: "none", // Prevent resizing if needed
+            }}
+            value={message}
+            onChange={handleMessageChange}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                // Call a function or handle the event
+                sendMessage();
+              }
+            }}
+            placeholder="Type a message"
+            className="send-message-input"
+          ></textarea>
 
-      <IoSendSharp
-        size={"25px"}
-        cursor={"pointer"}
-        color={dark ? "#d1d7db" : "#3b4a54"}
-        onClick={sendMessage}
-      />
+          <IoSendSharp
+            size={"25px"}
+            cursor={"pointer"}
+            color={dark ? "#d1d7db" : "#3b4a54"}
+            onClick={sendMessage}
+          />
+        </>
+      ) : (
+        <p
+          style={{
+            color: "#667781",
+            fontSize: "15px",
+            alignSelf: "center",
+            textAlign: "center",
+          }}
+        >
+          You can't send message to this group because you're no longer a member
+        </p>
+      )}
     </Flex>
   );
 };

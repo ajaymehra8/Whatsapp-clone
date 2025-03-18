@@ -12,6 +12,7 @@ import PopupInfo from "./components/myComponents/PopupInfo";
 import MessagePopup from "./components/myComponents/SelectedChatComponent/MessagePopup";
 import ChatHead from "./components/myComponents/SelectedChatComponent/ChatHead";
 import { notifyUser } from "./utils/api";
+import GroupDetails from "./components/myComponents/GroupChatComponents/GroupDetails";
 // Define a theme (optional)
 
 export default function Home() {
@@ -21,6 +22,7 @@ export default function Home() {
     setChats,
     setSelectedChat,
     otherUserId,
+    showGroup,
     showPopup,
     messagePopup,
   } = useGlobalState();
@@ -29,17 +31,17 @@ export default function Home() {
   const router = useRouter();
   const pathname = usePathname(); // Correct way in Next.js App Router
   const playSound = () => {
-    console.log("sound");
     const audio = new Audio("/sounds/notification.mp3"); // Ensure the file is in the `public/sounds` folder
     audio.play();
   };
   const handleMessageReceived = useCallback(
     async (newMessage: Message) => {
-      if (selectedChat && newMessage.sender === selectedChat.userId) {
+      if (selectedChat?._id === newMessage.chat?._id) {
         setSelectedChat((prevSelectedChat: ChatType | null) =>
-          prevSelectedChat
+          prevSelectedChat && prevSelectedChat?.messages
             ? {
                 ...prevSelectedChat,
+
                 messages: [...prevSelectedChat.messages, newMessage],
               }
             : null
@@ -100,7 +102,6 @@ export default function Home() {
         if (!selectedChat) {
           setChats((prevChats) => {
             return prevChats.map((chat) => {
-              console.log(chat._id, message);
               if (chat._id === message.chat?._id) {
                 if (chat.topMessage._id === message?._id) {
                   return { ...chat, topMessage: message };
@@ -113,7 +114,6 @@ export default function Home() {
           });
           return;
         } else {
-          console.log(message);
           setSelectedChat((prevChats) => {
             if (!prevChats) return prevChats; // Ensure prevChats is not null
 
@@ -129,7 +129,6 @@ export default function Home() {
         }
         setChats((prevChats) => {
           return prevChats.map((chat) => {
-            console.log(chat._id, message);
             if (chat._id === message.chat?._id) {
               if (chat.topMessage._id === message?._id) {
                 return { ...chat, topMessage: message };
@@ -168,6 +167,8 @@ export default function Home() {
       <SideBar />
       <SelectedChat messages={messages} setMessages={setMessages} />
       {otherUserId && <UserDetails />}
+      {showGroup && <GroupDetails />}
+
       {showPopup && <PopupInfo />}
       {messagePopup && <MessagePopup />}
     </FlexLayout>

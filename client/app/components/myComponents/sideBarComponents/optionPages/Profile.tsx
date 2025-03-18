@@ -134,7 +134,6 @@ const Profile: React.FC<PropType> = ({ option }) => {
           width: "fit-content", // To ensure the div wraps around the avatar
         }}>
           <Avatar.Root
-            size={"lg"}
             cursor={"pointer"}
 
             width={{ base: "clamp(30px,80vw,195px)", md: "clamp(30px,18vw,195px)" }}

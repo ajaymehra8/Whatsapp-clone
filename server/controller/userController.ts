@@ -8,9 +8,14 @@ import AppError from "../utils/appError";
 
 export const getUsers = catchAsync(
   async (req: MyRequest, res: Response, next: NextFunction) => {
-    const { search } = req.query;
-    let email;
-    if (req.user) email = req.user.email;
+    const { search, onlyUser, group } = req.query;
+    console.log(group);
+
+    if (!req.user) {
+      next(new AppError(401, "Unauthorized user"));
+      return;
+    }
+    const email = req.user.email;
 
     const query: FilterQuery<IUser> = {};
     if (search) {
@@ -24,8 +29,28 @@ export const getUsers = catchAsync(
         { email: { $ne: email } },
       ];
     }
+    if (typeof group === "string" && group!=="undefined") {
+      const groupId = new mongoose.Types.ObjectId(group);
+      const chat: IChat | null = await Chat.findById(groupId);
+      let membersOfGroup;
+      if (chat) {
+        membersOfGroup = chat.users;
+        if (membersOfGroup) {
+          query._id = { $nin: membersOfGroup };
+        }
+      }
+    }
     let users: IUser[] = await User.find(query);
-
+    if (onlyUser !== "false") {
+      console.log("why");
+      res.status(200).json({
+        success: true,
+        message: users ? "User fetched" : "No user or contact found.",
+        users,
+        oneToOneChats: [],
+      });
+      return;
+    }
     // Get the IDs of matched users
     const matchedUserIds: Types.ObjectId[] = users.map((user) => user._id);
     const userId: Types.ObjectId = new mongoose.Types.ObjectId(req?.user?.id);
@@ -52,19 +77,20 @@ export const getUsers = catchAsync(
     const oneToOneChatUserIds = oneToOneChats.flatMap((chat) =>
       chat.users.map((user) => user._id.toString())
     );
-
     // Filter out users who are already in one-to-one chats
     users = users.filter(
       (user) => !oneToOneChatUserIds.includes(user._id.toString())
     );
-    oneToOneChats = oneToOneChats.map(chat => {
-      
-      if (chat.deletedFor?.some(entry => entry.toString() === userId.toString())) {
-        console.log("working");
+    oneToOneChats = oneToOneChats.map((chat) => {
+      if (
+        chat.deletedFor?.some((entry) => entry.toString() === userId.toString())
+      ) {
         return { ...chat.toObject(), topMessage: "" }; // Convert to plain object before modifying
       }
       return chat;
     });
+    console.log(oneToOneChats);
+    console.log("working");
     res.status(200).json({
       success: true,
       message: users ? "User fetched" : "No user or contact found.",
@@ -74,30 +100,30 @@ export const getUsers = catchAsync(
   }
 );
 
-
-
 // GET USER
-export const getUser=catchAsync(async(req:MyRequest,res:Response,next:NextFunction)=>{
-  const {userId}=req.params as {userId:string|undefined};
+export const getUser = catchAsync(
+  async (req: MyRequest, res: Response, next: NextFunction) => {
+    const { userId } = req.params as { userId: string | undefined };
 
-  if(!userId){
-    next(new AppError(400,"No user selected"));
-    return;
+    if (!userId) {
+      next(new AppError(400, "No user selected"));
+      return;
+    }
+    const id = new mongoose.Types.ObjectId(userId);
+    const user: IUser | null = await User.findById(id);
+    res.status(200).json({
+      success: true,
+      message: "User fetched successfully",
+      user,
+    });
   }
-const id=new mongoose.Types.ObjectId(userId);
-const user:IUser|null=await User.findById(id);
-res.status(200).json({
-  success:true,
-  message:"User fetched successfully",
-  user
-})
-});
+);
 
 // UPDATE PROFILE
 
 type updateBody = {
   name?: string;
-  about: {content?:string};
+  about: { content?: string };
   image?: {
     name: string;
     link: string;
@@ -119,13 +145,11 @@ export const updateProfile = catchAsync(
     const { name, about, image } = req.body as reqBody;
     let userId;
     if (req.user) {
-      console.log(req.user);
       userId = req.user.id;
     }
-    console.log(userId);
 
     userId = new mongoose.Types.ObjectId(userId);
-    const field: updateBody = {about:{}};
+    const field: updateBody = { about: {} };
     if (!name && !about && !image) {
       next(new AppError(400, "No value provided for updation"));
       return;
@@ -134,22 +158,19 @@ export const updateProfile = catchAsync(
       field.name = name;
     }
     if (about) {
-      
       field.about.content = about;
     }
     if (image) {
-      field.image={
-        name:image.name,
-        link:image.link
-      }
+      field.image = {
+        name: image.name,
+        link: image.link,
+      };
     }
-    console.log(userId);
     const updatedUser: IUser | null = await User.findByIdAndUpdate(
       userId,
       field,
       { new: true }
     );
-    console.log(updatedUser);
     if (!updatedUser) {
       next(new AppError(400, "No user logged in"));
       return;
@@ -164,80 +185,92 @@ export const updateProfile = catchAsync(
 
 // change user privacy settings
 
-export const changePrivacy=catchAsync(async(req:MyRequest,res:Response,next:NextFunction)=>{
-  const {lastSeen,about,image}=req.body;
-  console.log(lastSeen,about,image);
-  console.log(req.user);
-let userId=req.user?.id;
-  if(!lastSeen && !about && !image){
-    next(new AppError(400,"No changes"));
-    return;
-  }
-  if(lastSeen){
-    let value:boolean;
-    console.log("working")
-    if(lastSeen==="everyone"){
-      value=true;
-    }else{
-      value=false
-    }
-    userId=new mongoose.Types.ObjectId(userId);
-   const user:IUser|null= await User.findByIdAndUpdate(userId,{
-    "lastSeen.visibility":value,
-    },{new:true});
-    if(!user){
-      next(new AppError(404,"No user found"));
-      return;
-    }
-    res.status(200).json({
-      success:true,
-      message:"LastSeen updated",
-    user
-    });
-    return;
-  }
-  
-  if(about){
-    let value:boolean;
-    if(about==="everyone"){
-      value=true;
-    }else{
-      value=false
-    }
-   const user:IUser|null= await User.findByIdAndUpdate(userId,{
-    "about.visibility":value,
-    },{new:true});
-    if(!user){
-      next(new AppError(404,"No user found"));
-      return;
-    }
-    res.status(200).json({
-      success:true,
-      message:"About visibility updated",
-      user
-    });
-    return;
-  }
+export const changePrivacy = catchAsync(
+  async (req: MyRequest, res: Response, next: NextFunction) => {
+    const { lastSeen, about, image } = req.body;
 
-  if(image){
-    let value:boolean;
-    if(image==="everyone"){
-      value=true;
-    }else{
-      value=false
-    }
-   const user:IUser|null= await User.findByIdAndUpdate(userId,{
-    "image.visibility":value,
-    },{new:true});
-    if(!user){
-      next(new AppError(404,"No user found"));
+    let userId = req.user?.id;
+    if (!lastSeen && !about && !image) {
+      next(new AppError(400, "No changes"));
       return;
     }
-    res.status(200).json({
-      success:true,
-      message:"Image visibility updated",
-      user
-    });
-    return;
+    if (lastSeen) {
+      let value: boolean;
+      if (lastSeen === "everyone") {
+        value = true;
+      } else {
+        value = false;
+      }
+      userId = new mongoose.Types.ObjectId(userId);
+      const user: IUser | null = await User.findByIdAndUpdate(
+        userId,
+        {
+          "lastSeen.visibility": value,
+        },
+        { new: true }
+      );
+      if (!user) {
+        next(new AppError(404, "No user found"));
+        return;
+      }
+      res.status(200).json({
+        success: true,
+        message: "LastSeen updated",
+        user,
+      });
+      return;
+    }
+
+    if (about) {
+      let value: boolean;
+      if (about === "everyone") {
+        value = true;
+      } else {
+        value = false;
+      }
+      const user: IUser | null = await User.findByIdAndUpdate(
+        userId,
+        {
+          "about.visibility": value,
+        },
+        { new: true }
+      );
+      if (!user) {
+        next(new AppError(404, "No user found"));
+        return;
+      }
+      res.status(200).json({
+        success: true,
+        message: "About visibility updated",
+        user,
+      });
+      return;
+    }
+
+    if (image) {
+      let value: boolean;
+      if (image === "everyone") {
+        value = true;
+      } else {
+        value = false;
+      }
+      const user: IUser | null = await User.findByIdAndUpdate(
+        userId,
+        {
+          "image.visibility": value,
+        },
+        { new: true }
+      );
+      if (!user) {
+        next(new AppError(404, "No user found"));
+        return;
+      }
+      res.status(200).json({
+        success: true,
+        message: "Image visibility updated",
+        user,
+      });
+      return;
+    }
   }
-})
+);

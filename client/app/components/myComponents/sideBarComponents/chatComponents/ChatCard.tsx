@@ -8,11 +8,18 @@ import { FaChevronDown } from "react-icons/fa";
 import CardOptions from "./CardOptions";
 import { useState, useRef, useEffect } from "react";
 import { TiPin } from "react-icons/ti";
-import { ChatType } from "@/app/types/allTypes";
+import { ChatType, UserType } from "@/app/types/allTypes";
 import { FaBan } from "react-icons/fa6";
 
 const ChatCard = ({ chat }: { chat: any }) => {
-  const { selectedChat, setSelectedChat, setChats, user } = useGlobalState();
+  const {
+    selectedChat,
+    setSelectedChat,
+    setChats,
+    user,
+    setOtherUserId,
+    setShowGroup,
+  } = useGlobalState();
   const { dark, socket } = useGlobalState();
   const [openOptionId, setOpenOptionId] = useState<ChatType | null>(null);
 
@@ -67,7 +74,8 @@ const ChatCard = ({ chat }: { chat: any }) => {
               chat?._id === id ? { ...chat, count: 0 } : chat
             )
           );
-          console.log(data.chat);
+          setOtherUserId("");
+          setShowGroup(null);
           setSelectedChat(data.chat);
         }
       }
@@ -127,7 +135,10 @@ const ChatCard = ({ chat }: { chat: any }) => {
           <Avatar.Fallback name={chat?.name} />
           <Avatar.Image
             src={
-              chat?.image?.visibility
+              chat?.isGroupedChat
+                ? chat?.image?.link ||
+                  "https://www.criconet.com/upload/photos/d-group.jpg"
+                : chat?.image?.visibility
                 ? chat?.image?.link
                 : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvodrlyTZzayZIVYMNDeGx_vAKPj8-Br7Z6Q&s"
             }
@@ -150,7 +161,8 @@ const ChatCard = ({ chat }: { chat: any }) => {
                   marginTop: "-2px",
                 }}
               >
-                {chat?.topMessage?.content}
+                {chat?.topMessage?.content.slice(0, 35) +
+                  (chat?.topMessage?.content.length > 35 ? "..." : "")}
               </p>
             ) : (
               <p
@@ -201,7 +213,9 @@ const ChatCard = ({ chat }: { chat: any }) => {
               </>
             )}
 
-            {chat?.topMessage && (
+            {(chat?.topMessage ||
+              (chat?.isGroupedChat &&
+                chat.users.some((u:UserType) => u._id === user?._id))) && (
               <FaChevronDown
                 color="#aebac1"
                 className="downIcon"

@@ -20,7 +20,6 @@ const MessagePopup = () => {
   const handleDeleteForMe = async () => {
     try {
       const messageId = messagePopup?._id;
-      console.log("working");
       const { data } = await deleteForMe(messageId);
       if (data.success) {
         setSelectedChat((prevChats) => {
@@ -54,15 +53,18 @@ const MessagePopup = () => {
     try {
       if (!socket) return;
       const messageId = messagePopup?._id;
-      console.log("working");
+      console.log(messageId);
       const { data } = await deleteForEveryone(messageId);
+      console.log(data);
+
       if (data.success) {
         setSelectedChat((prevChats) => {
           if (!prevChats) return prevChats; // Ensure prevChats is not null
 
           const updatedMessages = prevChats.messages?.map((message) => {
             if (message._id === messageId) {
-              return { ...message, deletedForEveryone: true };
+              console.log({ ...message, deletedForEveryone: true });
+              return data.newMessage;
             }
             return message;
           });
@@ -124,7 +126,7 @@ const MessagePopup = () => {
         className="bottom-btns"
         style={{ flexDirection: "column", gap: "20px", alignItems: "flex-end" }}
       >
-        {user?._id === messagePopup?.sender &&
+        {user?._id === messagePopup?.sender?._id &&
           !messagePopup?.deletedForEveryone && (
             <button className="confirm-btn" onClick={handleDeleteForEveryone}>
               Delete for everyone

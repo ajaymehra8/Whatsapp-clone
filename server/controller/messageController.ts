@@ -40,13 +40,21 @@ export const doMessage = catchAsync(
       topMessage?: IMessage | null;
       _id?: mongoose.Types.ObjectId | undefined;
       userId?: mongoose.Types.ObjectId | undefined;
-      lastSeen?: {time:Date ,visibility?:boolean}|undefined|string;
+      lastSeen?: { time: Date; visibility?: boolean } | undefined | string;
       count?: number;
       users?: (mongoose.Types.ObjectId | IUser)[]; // Allow both ObjectId & User document
+      isGroupedChat?:boolean;
     } = {};
+    if (!chat) {
+      chat = await Chat.findOne({
+        isGroupedChat: false,
+        users: { $all: [userId, chatId] },
+      });
+    }
     if (!chat) {
       otherUser = await User.findById(chatId);
       const chatAlreadyCreated: IChat | null = await Chat.findOne({
+        isGroupedChat:false,
         users: { $all: [userId, otherUser?._id] },
       });
       if (chatAlreadyCreated) {
@@ -66,7 +74,7 @@ export const doMessage = catchAsync(
       chatToSend._id = chat?._id;
       chatToSend.lastSeen = otherUser?.lastSeen || "";
       chatToSend.userId = otherUser._id;
-
+chatToSend.isGroupedChat=chat?.isGroupedChat;
       chatToSend.users = chat?.users;
     } else {
       const otherUser =
@@ -74,10 +82,10 @@ export const doMessage = catchAsync(
           ? (chat.users[1] as IUser)
           : (chat.users[0] as IUser);
       const deletedForOtherUser = chat.deletedFor?.includes(otherUser._id);
+  
       await Chat.findByIdAndUpdate(chat?._id, { deletedFor: [] });
 
       if (deletedForOtherUser) {
-        console.log("working");
         newChat = true;
         isDeleted = true;
         if (chat) chat = await Chat.findById(chat._id).populate("users");
@@ -87,9 +95,30 @@ export const doMessage = catchAsync(
         chatToSend._id = chat?._id;
         chatToSend.lastSeen = otherUser?.lastSeen || "";
         chatToSend.userId = otherUser._id;
+        chatToSend.isGroupedChat=chat?.isGroupedChat;
 
         chatToSend.users = chat?.users;
       }
+    }
+    let deletedForMe = chat?.deletedFor?.includes(userId);
+    deletedForMe=deletedForMe?true:false;
+    if(deletedForMe){
+    
+      const otherUser =
+      chat?.users[0]._id.toString() === userId.toString()
+        ? (chat?.users[1] as IUser)
+        : (chat?.users[0] as IUser);
+        if (chat) chat = await Chat.findById(chat._id).populate("users");
+        newChat = true;
+        chatToSend.name = otherUser?.name;
+        chatToSend.image = otherUser?.image;
+        chatToSend._id = chat?._id;
+        chatToSend.lastSeen = otherUser?.lastSeen || "";
+        chatToSend.userId = otherUser._id;
+        chatToSend.isGroupedChat=chat?.isGroupedChat;
+
+        chatToSend.users = chat?.users;
+      
     }
     let message: IMessage | null = await Message.create({
       sender: userId,
@@ -97,7 +126,7 @@ export const doMessage = catchAsync(
       content,
     });
 
-    message = await Message.findById(message._id).populate("chat");
+    message = await Message.findById(message._id).populate("chat sender");
     if (newChat && isDeleted) {
       const allMessages: IMessage[] = await Message.find({
         chat: chat?._id,
@@ -125,6 +154,7 @@ export const doMessage = catchAsync(
       newMessage: message,
       newChat,
       chat: chatToSend,
+      deletedForMe
     });
   }
 );
@@ -136,7 +166,7 @@ export const getAllMessage = catchAsync(
       next(new AppError(401, "Please provide all required fields"));
       return;
     }
-    const allMessage = await Message.find({ chat: chatId });
+    const allMessage = await Message.find({ chat: chatId }).populate("sender");
     res.status(200).json({
       success: true,
       message: "All messages fetched",
@@ -199,7 +229,7 @@ export const deleteMessageForEveryone = catchAsync(
       id,
       { deletedForEveryone: true, content: "Message Deleted" },
       { new: true }
-    ).populate({ path: "chat", select: "_id users" });
+    ).populate([{ path: "chat", select: "_id users" },{path:"sender"}]);
     if (!newMessage) {
       next(new AppError(404, "No message found"));
       return;
