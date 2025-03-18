@@ -13,6 +13,8 @@ const ChatHead = () => {
     isTyping,
     setOtherUserId,
     otherUserId,
+    setShowGroup,
+    showGroup,
   } = useGlobalState();
   function formatTimestamp(
     timestamp: Date | string | number | undefined
@@ -69,7 +71,7 @@ const ChatHead = () => {
       justifyContent={"space-between"}
       alignItems={"center"}
       padding={"10px 25px 10px 15px"}
-      width={{ base: "100%", md: otherUserId ? "35%" : "65%" }}
+      width={{ base: "100%", md: otherUserId || showGroup ? "35%" : "65%" }}
       cursor={"pointer"}
       position={"fixed"}
       top={0}
@@ -90,12 +92,20 @@ const ChatHead = () => {
 
         <Avatar.Root
           size={"sm"}
-          onClick={() => setOtherUserId(selectedChat?.userId)}
+          onClick={() => {
+            if (selectedChat?.userId) setOtherUserId(selectedChat?.userId);
+            if (selectedChat?.isGroupedChat) {
+              setShowGroup(selectedChat);
+            }
+          }}
         >
           <Avatar.Fallback name={selectedChat?.name} />
           <Avatar.Image
             src={
-              selectedChat?.image?.visibility
+              selectedChat?.isGroupedChat
+                ? selectedChat?.image?.link ||
+                  "https://www.criconet.com/upload/photos/d-group.jpg"
+                : selectedChat?.image?.visibility
                 ? selectedChat?.image?.link
                 : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvodrlyTZzayZIVYMNDeGx_vAKPj8-Br7Z6Q&s"
             }
@@ -103,7 +113,12 @@ const ChatHead = () => {
         </Avatar.Root>
         <div
           className="textBox"
-          onClick={() => setOtherUserId(selectedChat?.userId)}
+          onClick={() => {
+            if (selectedChat?.userId) setOtherUserId(selectedChat?.userId);
+            if (selectedChat?.isGroupedChat) {
+              setShowGroup(selectedChat);
+            }
+          }}
         >
           <p
             style={{

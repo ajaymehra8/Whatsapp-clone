@@ -6,9 +6,11 @@ import { useGlobalState } from "@/app/context/GlobalProvider";
 import Setting from "./sideBarComponents/optionPages/Setting";
 import Profile from "./sideBarComponents/optionPages/Profile";
 import SettingPage from "./sideBarComponents/optionPages/settingComonent/SettingPage";
+import AddMembersPage from "./GroupChatComponents/AddMembersPage";
+import GroupInfo from "./GroupChatComponents/GroupInfo";
 
 const SideBar = () => {
-  const { selectedChat, option, user } = useGlobalState();
+  const { selectedChat, option, selectedUserForGroup } = useGlobalState();
   return (
     <Box
       display={{ base: selectedChat ? "none" : "flex", md: "flex" }}
@@ -18,11 +20,15 @@ const SideBar = () => {
     >
       <Options />
       {option === "chats" && <Chats />}
+      {(option === "createGroup") && (selectedUserForGroup.length > 0 ? (
+        <GroupInfo />
+      ) : (
+        <AddMembersPage />
+      ))}
       {option === "profile" && <Profile option="chats" />}
 
       {option === "setting" && <Setting />}
       {option === "privacy" && <SettingPage details={{ heading: "Privacy" }} />}
-      
     </Box>
   );
 };

@@ -1,9 +1,9 @@
 "useClient";
 import { Box, Button } from "@chakra-ui/react";
 import { MdOutlineAddComment } from "react-icons/md";
-import { SlOptionsVertical } from "react-icons/sl";
 import SearchBar from "./SearchBar";
 import { useEffect, useState, useRef } from "react";
+import { Tooltip } from "../../ui/tooltip";
 import ChatCard from "./chatComponents/ChatCard";
 import { useGlobalState } from "@/app/context/GlobalProvider";
 import { getAllChats } from "@/app/utils/api";
@@ -17,7 +17,8 @@ import { ChatType } from "@/app/types/allTypes";
 
 const Chats = () => {
   const [active, setActive] = useState("All");
-  const { user, dark, fetchAgain, chats, setChats } = useGlobalState();
+  const { user, dark, fetchAgain, chats, setChats, setOption } =
+    useGlobalState();
   const buttons = ["All", "Unread", "Groups"];
   const divRef = useRef<HTMLDivElement | null>(null);
   const [height, setHeight] = useState<number>(0);
@@ -40,9 +41,7 @@ const Chats = () => {
     if (user && chats.length < 1)
       try {
         const { data } = await getAllChats();
-
         const chats = createChat(data.chats, user?._id);
-        console.log(chats);
         chats.sort((a: ChatType, b: ChatType) => {
           // Move pinned chats to the top
           if (a.isPinned !== b.isPinned) {
@@ -109,11 +108,17 @@ const Chats = () => {
             width={"10%"}
             alignItems={"center"}
           >
-            <MdOutlineAddComment
-              size="20px"
-              color={dark ? "#a5b1b8" : "#54656f"}
-              cursor="pointer"
-            />
+            <Tooltip
+              content="Create group"
+              positioning={{ placement: "bottom" }}
+            >
+              <MdOutlineAddComment
+                size="20px"
+                color={dark ? "#a5b1b8" : "#54656f"}
+                cursor="pointer"
+                onClick={() => setOption("createGroup")}
+              />
+            </Tooltip>
           </Box>
         </Box>
         <SearchBar setChats={setChats} setNoItemText={setNoItemText} />
@@ -147,7 +152,7 @@ const Chats = () => {
         flexDirection={"column"}
         marginTop={height + 25 + "px"}
         height={"75vh"}
-        pb={{base:'30px',md:0}}
+        pb={{ base: "30px", md: 0 }}
         overflowY={"auto"}
         bg={dark ? "#111b21" : ""}
       >

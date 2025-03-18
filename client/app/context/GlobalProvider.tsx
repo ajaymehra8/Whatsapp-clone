@@ -5,11 +5,11 @@ import {
   useState,
   ReactNode,
   useEffect,
-  useMemo,
 } from "react";
 import { Socket } from "socket.io-client";
 import getSocket from "@/lib/socket";
-import { ChatType, Message } from "../types/allTypes";
+import { ChatType, Message, UserType } from "../types/allTypes";
+import { createGroupChat } from "../components/myComponents/sideBarComponents/utils/createChat";
 
 // Define the shape of the context
 
@@ -33,12 +33,16 @@ interface GlobalContextType {
   setIsTyping: React.Dispatch<React.SetStateAction<ChatType | null>>;
   option: string;
   setOption: React.Dispatch<React.SetStateAction<string>>;
-  otherUserId: string;
-  setOtherUserId: React.Dispatch<React.SetStateAction<string>>;
+  otherUserId: string | undefined;
+  setOtherUserId: React.Dispatch<React.SetStateAction<string | undefined>>;
   showPopup: string;
   setShowPopup: React.Dispatch<React.SetStateAction<string>>;
   messagePopup: Message | null;
   setMessagePopup: React.Dispatch<React.SetStateAction<Message | null>>;
+  selectedUserForGroup: UserType[];
+  setSelectedUserForGroup: React.Dispatch<React.SetStateAction<UserType[]>>;
+  showGroup: ChatType | null;
+  setShowGroup: React.Dispatch<React.SetStateAction<ChatType | null>>;
 }
 
 // Create context with a default value
@@ -50,9 +54,12 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
   const [option, setOption] = useState<string>("chats");
   const [chats, setChats] = useState<ChatType[]>([]);
   const [dark, setDark] = useState<boolean>(false);
-  const [otherUserId, setOtherUserId] = useState<string>("");
+  const [otherUserId, setOtherUserId] = useState<string | undefined>("");
   const [showPopup, setShowPopup] = useState<string>("");
   const [messagePopup, setMessagePopup] = useState<Message | null>(null);
+  const [selectedUserForGroup, setSelectedUserForGroup] = useState<UserType[]>(
+    []
+  );
 
   // useEffect(() => {
   //   if (typeof window !== "undefined") {
@@ -64,6 +71,7 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<any>(null);
   const [fetchAgain, setFetchAgain] = useState<boolean>(false);
   const [isTyping, setIsTyping] = useState<ChatType | null>(null);
+  const [showGroup, setShowGroup] = useState<ChatType | null>(null);
   const socket = getSocket(); // Initialize socket
 
   // Listen for system theme changes
@@ -125,7 +133,6 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
         lastSeen: string;
       }) => {
         if (selectedChat?.userId === data.userId) {
-          console.log(selectedChat);
           setSelectedChat((prevSelectedChat: ChatType | null) =>
             prevSelectedChat
               ? {
@@ -140,7 +147,14 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
         }
       };
       const handleNewChat = (chat: ChatType) => {
+          if (chat.isGroupedChat) {
+            console.log(chat);
+            let tempChat = createGroupChat(chat);
+            console.log(tempChat);
+            if (tempChat) chat = tempChat;
+          }
         setChats((prevChats) => {
+        
           let pinnedChats = prevChats.filter((chat) => chat.isPinned);
           const oldChats = prevChats.filter(
             (c) => !c.isPinned && chat._id !== c._id
@@ -202,6 +216,10 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
         setShowPopup,
         messagePopup,
         setMessagePopup,
+        selectedUserForGroup,
+        setSelectedUserForGroup,
+        showGroup,
+        setShowGroup,
       }}
     >
       {children}

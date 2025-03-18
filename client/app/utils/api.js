@@ -21,7 +21,8 @@ export const login = (data) => API.post("/auth/login", data);
 export const signup = (data) => API.post("/auth/signup", data);
 
 //user api calls
-export const users = (search) => API.get(`/user?search=${search}`);
+export const users = (search, onlyUser, group) =>
+  API.get(`/user?search=${search}&onlyUser=${onlyUser}&group=${group?._id}`);
 export const getUser = (userId) => API.get(`/user/${userId}`);
 export const changePrivacy = (lastSeen, image, about) =>
   API.patch(`/user/change-privacy`, { lastSeen, image, about });
@@ -42,6 +43,26 @@ export const deleteChat = (chatId) => API.post("/chat/delete-chat", { chatId });
 export const pinTheChat = (chatId) => API.post(`/chat/pin-chat`, { chatId });
 export const unpinTheChat = (chatId) =>
   API.post(`/chat/unpin-chat`, { chatId });
+/* GROUP APIS  */
+export const createGroup = (form) =>
+  API.post("/chat/create-group", form, {
+    headers: {
+      "Content-Type": "multipart/form-data", // Ensure correct content type for file upload
+    },
+  });
+  export const updateGroup = (form) =>
+    API.patch("/chat/group/updateGroup", form, {
+      headers: {
+        "Content-Type": "multipart/form-data", // Ensure correct content type for file upload
+      },
+    });
+export const getGroupMembers = (groupId) => API.post(`/chat/group/${groupId}`);
+export const leaveGroup = (chatId) =>
+  API.post(`/chat/group/leave-group`, { chatId });
+export const removeMemberAPI = (group, selectedUser) =>
+  API.post(`/chat/group/remove-member`, { group, selectedUser });
+export const addMembers = (group, selectedUsers) =>
+  API.post(`/chat/group/addMembers`, { group, selectedUsers });
 
 //message api calls
 export const doMessage = (chatId, content) =>

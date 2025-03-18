@@ -1,17 +1,18 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 import { IUser } from "./userModel";
+import { IMessage } from "./messageModel";
 // Define an interface for the user document
 export interface IChat extends Document {
   _id: mongoose.Types.ObjectId;
   groupName?: string;
-  image?: string;
-  isGroupedChat?: boolean;
+  image?: { link: string; name?: string };
+  isGroupedChat: boolean;
   groupAdmin?: mongoose.Types.ObjectId;
-  topMessage?: string|undefined;
+  topMessage?: mongoose.Types.ObjectId|IMessage;
   users: (mongoose.Types.ObjectId | IUser)[]; // Allow both ObjectId & User document
-  count:number;
+  count: number;
   deletedFor?: (mongoose.Types.ObjectId | IUser)[];
-  pinnedBy?:(mongoose.Types.ObjectId | IUser)[];
+  pinnedBy?: (mongoose.Types.ObjectId | IUser)[];
 }
 
 const chatSchema: Schema<IChat> = new mongoose.Schema<IChat>(
@@ -24,15 +25,24 @@ const chatSchema: Schema<IChat> = new mongoose.Schema<IChat>(
       default: false,
     },
     groupAdmin: {
-      type: mongoose.Schema.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Users",
     },
     image: {
-      type: String,
+      name: {
+        type: String,
+      },
+      link: {
+        type: String,
+      },
+      visibility: {
+        type: Boolean,
+        default: true,
+      },
     },
     topMessage: {
       type: mongoose.Schema.Types.ObjectId,
-      ref:"Message"
+      ref: "Message",
     },
     users: [
       {
@@ -41,19 +51,16 @@ const chatSchema: Schema<IChat> = new mongoose.Schema<IChat>(
         required: true,
       },
     ],
-    count:{
-      type:Number,
-      default:0
+    count: {
+      type: Number,
+      default: 0,
     },
     deletedFor: [
- { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-   
+      { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     ],
     pinnedBy: [
       { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-        
-         ],
-
+    ],
   },
   { timestamps: true }
 );
