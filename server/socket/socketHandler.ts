@@ -100,23 +100,23 @@ const socketHandler = (io: Server) => {
     socket.on("new_chat", (chat: ChatType) => {
       let sender;
       if (chat.isGroupedChat) {
-        sender = chat.groupAdmin;
+        sender = chat.topMessage?.sender;
       } else {
         sender = chat.topMessage?.sender;
       }
-      console.log(chat.users);
+      console.log(sender);
       if (!chat.users || !Array.isArray(chat.users)) {
         return console.error("chat.users is not defined or not an array");
       }
       if (!chat.isGroupedChat) {
-        const senderUser = chat?.users?.find((user) => user._id === sender);
-        chat.name = senderUser?.name;
-        chat.image = senderUser?.image;
-        chat.lastSeen = senderUser?.lastSeen;
-        chat.userId = senderUser?._id;
+        chat.name = sender?.name;
+        chat.image = sender?.image;
+        chat.lastSeen = sender?.lastSeen;
+        chat.userId = sender?._id;
       } 
+      console.log(chat,"socket");
       chat.users?.forEach((user: UserType) => {
-        if (user._id.toString() !== sender) {
+        if (user._id.toString() !== sender?._id) {
           const receiverSocketId = users.get(user._id.toString());
 
           if (receiverSocketId) {

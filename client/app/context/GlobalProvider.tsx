@@ -147,6 +147,7 @@ export const GlobalProvider = ({ children }: { children: ReactNode }) => {
         }
       };
       const handleNewChat = (chat: ChatType) => {
+        console.log(chat);
           if (chat.isGroupedChat) {
             console.log(chat);
             let tempChat = createGroupChat(chat);

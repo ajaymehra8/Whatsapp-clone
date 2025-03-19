@@ -51,6 +51,7 @@ export const doMessage = catchAsync(
         users: { $all: [userId, chatId] },
       });
     }
+    console.log(chat);
     if (!chat) {
       otherUser = await User.findById(chatId);
       const chatAlreadyCreated: IChat | null = await Chat.findOne({
@@ -148,6 +149,7 @@ chatToSend.isGroupedChat=chat?.isGroupedChat;
       { topMessage: message?._id },
       { new: true }
     );
+    console.log(chatToSend,"chatTosend");
     res.status(201).json({
       success: true,
       message: "Message send",

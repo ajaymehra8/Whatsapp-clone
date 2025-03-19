@@ -57,6 +57,7 @@ const MessageInput = () => {
         const { data } = await doMessage(selectedChat?._id, message);
 
         if (data.newChat) {
+          console.log(data.chat);
           setChats((prevChats) => {
             let pinnedChats = prevChats.filter((chat) => chat.isPinned);
             const oldChats = prevChats.filter(
@@ -83,44 +84,45 @@ const MessageInput = () => {
                   }
               : null
           );
+          setChats((prevChats: ChatType[]) => {
+            if (!selectedChat) return prevChats; // Ensure selectedChat is defined
+            const updatedChats = prevChats.map((chat) =>
+              chat?._id === data.newMessage.chat?._id
+                ? { ...chat, topMessage: data.newMessage }
+                : chat
+            );
+            const updatedChat = updatedChats.find(
+              (chat) => chat?._id === data.newMessage.chat?._id
+            );
+  
+            let pinnedChats = updatedChats.filter((chat) => chat.isPinned);
+            const oldChats = updatedChats.filter(
+              (c) => !c.isPinned && data.newMessage.chat._id !== c._id
+            );
+  
+            let isPinned: boolean = false;
+            if (!updatedChat) {
+              return [...pinnedChats, ...oldChats];
+            }
+  
+            if (pinnedChats.some((c) => c._id === updatedChat._id)) {
+              isPinned = true;
+              pinnedChats = pinnedChats.map((c) => {
+                if (updatedChat?._id === c._id) {
+                  return updatedChat;
+                }
+                return c;
+              });
+            }
+            if (isPinned) {
+              return [...pinnedChats, ...oldChats];
+            }
+  
+            return [...pinnedChats, updatedChat, ...oldChats];
+          });
         }
 
-        setChats((prevChats: ChatType[]) => {
-          if (!selectedChat) return prevChats; // Ensure selectedChat is defined
-          const updatedChats = prevChats.map((chat) =>
-            chat?._id === data.newMessage.chat?._id
-              ? { ...chat, topMessage: data.newMessage }
-              : chat
-          );
-          const updatedChat = updatedChats.find(
-            (chat) => chat?._id === data.newMessage.chat?._id
-          );
-
-          let pinnedChats = updatedChats.filter((chat) => chat.isPinned);
-          const oldChats = updatedChats.filter(
-            (c) => !c.isPinned && data.newMessage.chat._id !== c._id
-          );
-
-          let isPinned: boolean = false;
-          if (!updatedChat) {
-            return [...pinnedChats, ...oldChats];
-          }
-
-          if (pinnedChats.some((c) => c._id === updatedChat._id)) {
-            isPinned = true;
-            pinnedChats = pinnedChats.map((c) => {
-              if (updatedChat?._id === c._id) {
-                return updatedChat;
-              }
-              return c;
-            });
-          }
-          if (isPinned) {
-            return [...pinnedChats, ...oldChats];
-          }
-
-          return [...pinnedChats, updatedChat, ...oldChats];
-        });
+       
 
         socket.emit("send_message", data.newMessage);
         setMessage("");

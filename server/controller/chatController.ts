@@ -40,6 +40,8 @@ export const createChat = catchAsync(
 export const getAllChats = catchAsync(
   async (req: MyRequest, res: Response, next: NextFunction) => {
     const user: JwtPayload | undefined = req.user;
+    const { unread, group } = req.query;
+
     if (!user) {
       next(new AppError(401, "User is not authorized"));
       return;
@@ -47,16 +49,33 @@ export const getAllChats = catchAsync(
     const userId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
       user.id
     );
+    interface Query {
+      users: mongoose.Types.ObjectId;
+      deletedFor: { $nin: mongoose.Types.ObjectId };
+      count?: { $gt: number } | undefined;
+      isGroupedChat?: boolean | undefined;
+    }
 
-    let chats: IChat[] = await Chat.find({
+    const query: Query = {
       users: userId,
-      deletedFor: { $nin: userId }, // Ensure userId is not inside deletedFor array
-    }).populate([
+      deletedFor: { $nin: userId },
+    };
+
+    if (unread) {
+      query.count = { $gt: 0 };
+    }
+
+    if (group) {
+      query.isGroupedChat = true;
+    }
+
+    let chats: IChat[] = await Chat.find(query).populate([
       {
         path: "users",
       },
       { path: "topMessage", select: "content createdAt sender" },
     ]);
+    console.log(chats);
     if (!chats) {
       res.status(200).json({
         success: true,

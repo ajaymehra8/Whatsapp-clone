@@ -37,6 +37,9 @@ export const updateUser = (formData) =>
 //chat api calls
 export const chats = (id) => API.get(`/chat/${id}`);
 export const getAllChats = () => API.get(`/chat`);
+export const getAllUnreadChats = () => API.get(`/chat?unread=${true}`);
+export const getAllGroupChats = () => API.get(`/chat?group=${true}`);
+
 export const notifyUser = (chatId) =>
   API.post("/chat/push-notification", { chatId });
 export const deleteChat = (chatId) => API.post("/chat/delete-chat", { chatId });
@@ -50,12 +53,12 @@ export const createGroup = (form) =>
       "Content-Type": "multipart/form-data", // Ensure correct content type for file upload
     },
   });
-  export const updateGroup = (form) =>
-    API.patch("/chat/group/updateGroup", form, {
-      headers: {
-        "Content-Type": "multipart/form-data", // Ensure correct content type for file upload
-      },
-    });
+export const updateGroup = (form) =>
+  API.patch("/chat/group/updateGroup", form, {
+    headers: {
+      "Content-Type": "multipart/form-data", // Ensure correct content type for file upload
+    },
+  });
 export const getGroupMembers = (groupId) => API.post(`/chat/group/${groupId}`);
 export const leaveGroup = (chatId) =>
   API.post(`/chat/group/leave-group`, { chatId });
