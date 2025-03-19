@@ -6,7 +6,11 @@ import { useEffect, useState, useRef } from "react";
 import { Tooltip } from "../../ui/tooltip";
 import ChatCard from "./chatComponents/ChatCard";
 import { useGlobalState } from "@/app/context/GlobalProvider";
-import { getAllChats } from "@/app/utils/api";
+import {
+  getAllChats,
+  getAllGroupChats,
+  getAllUnreadChats,
+} from "@/app/utils/api";
 import { AxiosError } from "axios";
 import { toaster } from "../../ui/toaster";
 import { createChat } from "./utils/createChat";
@@ -19,29 +23,19 @@ const Chats = () => {
   const [active, setActive] = useState("All");
   const { user, dark, fetchAgain, chats, setChats, setOption } =
     useGlobalState();
-  const buttons = ["All", "Unread", "Groups"];
+  const [noItemText, setNoItemText] = useState("No chats,yet.");
   const divRef = useRef<HTMLDivElement | null>(null);
   const [height, setHeight] = useState<number>(0);
-  const [noItemText, setNoItemText] = useState("No chats,yet.");
-
-  useEffect(() => {
-    if (!divRef.current) return;
-
-    // ResizeObserver to track height changes
-    const observer = new ResizeObserver(([entry]) => {
-      setHeight(entry.contentRect.height);
-    });
-
-    observer.observe(divRef.current);
-
-    return () => observer.disconnect(); // Cleanup on unmount
-  }, []);
-
   const fetchChats = useCallback(async () => {
-    if (user && chats.length < 1)
+    if (user)
       try {
         const { data } = await getAllChats();
         const chats = createChat(data.chats, user?._id);
+        if(chats.length<1){
+          setNoItemText("No chats,yet.");
+          setChats([]);
+          return;
+        }
         chats.sort((a: ChatType, b: ChatType) => {
           // Move pinned chats to the top
           if (a.isPinned !== b.isPinned) {
@@ -66,6 +60,110 @@ const Chats = () => {
         }
       }
   }, [user, fetchAgain]);
+
+  const buttons = [
+    {
+      name: "All",
+      onClick: () => {
+        fetchChats();
+      },
+    },
+    {
+      name: "Unread",
+      onClick: async () => {
+        if (user)
+          try {
+            const { data } = await getAllUnreadChats();
+            console.log(data);
+
+            let chats = createChat(data.chats, user?._id);
+            chats = chats.filter(
+              (c: ChatType) => c.topMessage?._id !== user?._id
+            );
+            if (chats.length < 1) {
+              setNoItemText(`No unread chats`);
+              setChats([]);
+              return;
+            }
+            chats.sort((a: ChatType, b: ChatType) => {
+              // Move pinned chats to the top
+              if (a.isPinned !== b.isPinned) {
+                return a.isPinned ? -1 : 1; // Pinned first
+              }
+
+              // Sort by latest topMessage.createdAt
+              return (
+                new Date(b.topMessage?.createdAt ?? 0).getTime() -
+                new Date(a.topMessage?.createdAt ?? 0).getTime()
+              );
+            });
+            setChats(chats);
+          } catch (err) {
+            if (err instanceof AxiosError) {
+              console.log(err);
+              toaster.create({
+                title:
+                  err?.response?.data?.message || "Problem in fetching chats",
+                description: "Try again",
+                type: "error",
+              });
+            }
+          }
+      },
+    },
+    {
+      name: "Groups",
+      onClick: async () => {
+        if (user)
+          try {
+            const { data } = await getAllGroupChats();
+            if (data.chats.length < 1) {
+              setNoItemText("You are not joined in any group.");
+              setChats([]);
+
+            }
+            const chats = createChat(data.chats, user?._id);
+            chats.sort((a: ChatType, b: ChatType) => {
+              // Move pinned chats to the top
+              if (a.isPinned !== b.isPinned) {
+                return a.isPinned ? -1 : 1; // Pinned first
+              }
+
+              // Sort by latest topMessage.createdAt
+              return (
+                new Date(b.topMessage?.createdAt ?? 0).getTime() -
+                new Date(a.topMessage?.createdAt ?? 0).getTime()
+              );
+            });
+            setChats(chats);
+          } catch (err) {
+            if (err instanceof AxiosError) {
+              console.log(err);
+              toaster.create({
+                title:
+                  err?.response?.data?.message || "Problem in fetching chats",
+                description: "Try again",
+                type: "error",
+              });
+            }
+          }
+      },
+    },
+  ];
+
+  useEffect(() => {
+    if (!divRef.current) return;
+
+    // ResizeObserver to track height changes
+    const observer = new ResizeObserver(([entry]) => {
+      setHeight(entry.contentRect.height);
+    });
+
+    observer.observe(divRef.current);
+
+    return () => observer.disconnect(); // Cleanup on unmount
+  }, []);
+
   useEffect(() => {
     fetchChats();
   }, [fetchChats]);
@@ -131,17 +229,18 @@ const Chats = () => {
           paddingLeft={"14px"}
           marginTop={"10px"}
         >
-          {buttons.map((text, ind) => (
+          {buttons.map((btn, ind) => (
             <button
               className={`roundedBtn ${
-                active === text ? "roundedBtnActive" : ""
+                active === btn.name ? "roundedBtnActive" : ""
               }`}
               onClick={(e) => {
-                setActive(text);
+                setActive(btn.name);
+                btn.onClick();
               }}
               key={ind}
             >
-              {text}
+              {btn.name}
             </button>
           ))}
         </Box>

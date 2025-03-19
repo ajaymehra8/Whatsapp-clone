@@ -235,6 +235,7 @@ margin-left: 35px;
   transform: translateY(2px);
 }
 .no-item-text {
+  text-align: center;
   align-self: center;
   margin-top: auto;
   margin-bottom: auto;
