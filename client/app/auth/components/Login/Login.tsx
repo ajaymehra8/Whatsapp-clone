@@ -42,7 +42,7 @@ const Login = () => {
   };
   return (
     <Box
-      width={{base:"100%",md:"33%"}}
+      width={{base:"100%",md:"40%",lg:"30%"}}
       height={"100vh"}
 
       bg={"#f0f2f5"}

@@ -139,7 +139,7 @@ const AddMembersPage: React.FC<propType> = ({
             flexWrap={"wrap"}
             justifyContent={"start"}
             alignItems={"center"}
-            maxHeight={"300px"}
+            maxHeight={"200px"}
             overflow={"auto"}
             gap={"5px"}
           >

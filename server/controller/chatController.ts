@@ -465,6 +465,32 @@ export const leaveGroup = catchAsync(
       return;
     }
     const userId = new mongoose.Types.ObjectId(user?.id);
+    if(chat.users.length===1){
+      await Chat.findByIdAndDelete(id);
+      res.status(200).json({
+        success: true,
+        message: "You leaved the group.",
+        chat:null,
+      });
+      return;
+    }
+
+    if(chat.groupAdmin?.equals(userId)){
+      const candidate=chat.users.filter(u=>!u._id.equals(userId))[0];
+      chat = await Chat.findByIdAndUpdate(
+        id,
+        { $pull: { users: userId },groupAdmin:candidate },
+        { new: true }
+      ).populate([
+        {
+          path: "users",
+          select: "image name about",
+        },
+        {
+          path: "topMessage",
+        },
+      ]);
+    }else{
     chat = await Chat.findByIdAndUpdate(
       id,
       { $pull: { users: userId } },
@@ -478,6 +504,7 @@ export const leaveGroup = catchAsync(
         path: "topMessage",
       },
     ]);
+  }
     console.log(chat);
     if (!chat) {
       next(new AppError(500, "Problem in updating chat"));
@@ -510,6 +537,8 @@ export const removeGroupMembers = catchAsync(
     }
     const userId = new mongoose.Types.ObjectId(user.id);
     const selectedUserId = new mongoose.Types.ObjectId(selectedUser);
+    // const otherUser=await User.findById(selectedUserId);
+    // const currUser=await User.findById(userId);
     const chatId = new mongoose.Types.ObjectId(group);
     let chat: IChat | null = await Chat.findOne({
       isGroupedChat: true,
@@ -541,6 +570,12 @@ export const removeGroupMembers = catchAsync(
       next(new AppError(404, "No chat updated"));
       return;
     }
+    // const message: IMessage | null = await Message.create({
+    //   sender: userId,
+    //   content: `${currUser?.name} removed ${otherUser?.name}`,
+    //   chat: chat?._id,
+    //   notification: userId,
+    // });
     if (chat && chat.users) {
       chat.users.sort((a, b) => {
         if (a._id.equals(chat.groupAdmin) || b._id.equals(chat.groupAdmin)) {
@@ -553,6 +588,7 @@ export const removeGroupMembers = catchAsync(
       success: true,
       message: "User removed successfully",
       chat,
+      // notif:message
     });
   }
 );

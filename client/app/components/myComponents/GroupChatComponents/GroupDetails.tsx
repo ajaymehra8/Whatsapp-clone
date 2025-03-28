@@ -49,12 +49,32 @@ const GroupDetails = () => {
     try {
       const { data } = await leaveGroup(showGroup?._id);
       if (data.success) {
+
+        if (!data.chat) {
+          toaster.create({
+            title: data?.message,
+            description: "Enjoy",
+            type: "success",
+          });
+          setChats((prevChat) =>
+            prevChat.filter((chat) => chat._id !== showGroup?._id)
+          );
+          setSelectedChat(null);
+          setShowGroup(null);
+
+          return;
+        }
         const updatedChat = createGroupChat(data.chat);
         setShowGroup(updatedChat);
         if (updatedChat?.users) setGroupMembers(updatedChat?.users);
         if (selectedChat?._id === showGroup?._id) {
-          setSelectedChat(updatedChat);
+          setChats((prevChat) =>
+            prevChat.filter((chat) => chat._id !== showGroup?._id)
+          );
+          setSelectedChat(null);
+          setShowGroup(null);
         }
+
         toaster.create({
           title: data?.message,
           description: "Enjoy",

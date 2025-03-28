@@ -8,21 +8,60 @@ import { toaster } from "@/app/components/ui/toaster";
 import { FaBan } from "react-icons/fa6";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import { RiDeleteBin6Line } from "react-icons/ri";
-import { getUser } from "@/app/utils/api";
+import { chats, getUser } from "@/app/utils/api";
 import { UserType } from "@/app/types/allTypes";
 
 interface PropType {
   option?: string;
 }
 const UserDetails: React.FC<PropType> = () => {
-  const { dark, otherUserId, setOtherUserId, setShowPopup, selectedChat } =
-    useGlobalState();
+  const {
+    dark,
+    otherUserId,
+    setOtherUserId,
+    setShowPopup,
+    selectedChat,
+    setShowGroup,
+    setChats,
+    socket,
+    setSelectedChat,
+  } = useGlobalState();
   const [user, setUser] = useState<UserType | null>(null);
   // useEffect(() => {
   //   if (selectedChat?.userId !== otherUserId) {
   //     setOtherUserId("");
   //   }
   // }, [selectedChat]);
+
+  const setChat = async (id: string | undefined) => {
+    if (!id) {
+      return;
+    }
+    try {
+      if (socket) {
+        const { data } = await chats(id);
+        if (data.success) {
+          socket.emit("join_chat", data.chat?._id); // Emit event to server
+          setChats((prevChats) =>
+            prevChats.map((chat) =>
+              chat?._id === id ? { ...chat, count: 0 } : chat
+            )
+          );
+          setOtherUserId("");
+          setShowGroup(null);
+          setSelectedChat(data.chat);
+        }
+      }
+    } catch (err) {
+      if (err instanceof AxiosError)
+        toaster.create({
+          title: err?.response?.data.message || "Error in login",
+          description: "Try again",
+          type: "error",
+        });
+    }
+  };
+
   const fetchUserDetails = useCallback(async () => {
     try {
       if (!otherUserId) {
@@ -179,50 +218,75 @@ const UserDetails: React.FC<PropType> = () => {
         flexDirection={"column"}
         gap={"5px"}
       >
-        <Box
-          display={"flex"}
-          minH={"45px"}
-          width={"100%"}
-          padding={{ base: "5px 20px", md: "0 40px" }}
-          alignItems={"center"}
-          gap={"25px"}
-          cursor={"pointer"}
-          background={dark ? "#111b21" : "#ffffff"}
-          _hover={{
-            background: dark ? "#202c33" : "#f0f2f5",
-          }}
-          letterSpacing={"1px"}
-          color={dark ? "#ac4855" : "#ef426c"}
-        >
-          <FaBan size={"17px"} />
+        {!selectedChat?.isGroupedChat ? (
+          <>
+            <Box
+              display={"flex"}
+              minH={"45px"}
+              width={"100%"}
+              padding={{ base: "5px 20px", md: "0 40px" }}
+              alignItems={"center"}
+              gap={"25px"}
+              cursor={"pointer"}
+              background={dark ? "#111b21" : "#ffffff"}
+              _hover={{
+                background: dark ? "#202c33" : "#f0f2f5",
+              }}
+              letterSpacing={"1px"}
+              color={dark ? "#ac4855" : "#ef426c"}
+            >
+              <FaBan size={"17px"} />
 
-          <p style={{ fontSize: "17px" }}>Block {user?.name}</p>
-        </Box>
+              <p style={{ fontSize: "17px" }}>Block {user?.name}</p>
+            </Box>
 
-        <Box
-          display={"flex"}
-          minH={"45px"}
-          width={"100%"}
-          padding={{ base: "5px 20px", md: "0 40px" }}
-          alignItems={"center"}
-          gap={"25px"}
-          cursor={"pointer"}
-          background={dark ? "#111b21" : "#ffffff"}
-          _hover={{
-            background: dark ? "#202c33" : "#f0f2f5",
-          }}
-          letterSpacing={"1px"}
-          color={dark ? "#ac4855" : "#ef426c"}
-          onClick={(e) => {
-            e.stopPropagation();
-            setOtherUserId("");
-            if (selectedChat?._id) setShowPopup(selectedChat?._id);
-          }}
-        >
-          <RiDeleteBin6Line size={"17px"} />
+            <Box
+              display={"flex"}
+              minH={"45px"}
+              width={"100%"}
+              padding={{ base: "5px 20px", md: "0 40px" }}
+              alignItems={"center"}
+              gap={"25px"}
+              cursor={"pointer"}
+              background={dark ? "#111b21" : "#ffffff"}
+              _hover={{
+                background: dark ? "#202c33" : "#f0f2f5",
+              }}
+              letterSpacing={"1px"}
+              color={dark ? "#ac4855" : "#ef426c"}
+              onClick={(e) => {
+                e.stopPropagation();
+                setOtherUserId("");
+                if (selectedChat?._id) setShowPopup(selectedChat?._id);
+              }}
+            >
+              <RiDeleteBin6Line size={"17px"} />
 
-          <p style={{ fontSize: "17px" }}>Delete chat</p>
-        </Box>
+              <p style={{ fontSize: "17px" }}>Delete chat</p>
+            </Box>
+          </>
+        ) : (
+          <Box
+            display={"flex"}
+            minH={"45px"}
+            width={"100%"}
+            padding={{ base: "5px 20px", md: "0 40px" }}
+            alignItems={"center"}
+            gap={"25px"}
+            cursor={"pointer"}
+            background={dark ? "#111b21" : "#ffffff"}
+            _hover={{
+              background: dark ? "#202c33" : "#f0f2f5",
+            }}
+            letterSpacing={"1px"}
+            onClick={(e) => {
+              e.stopPropagation();
+              setChat(otherUserId);
+            }}
+          >
+            Message
+          </Box>
+        )}
       </Box>
     </Box>
   );

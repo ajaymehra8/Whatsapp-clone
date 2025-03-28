@@ -16,6 +16,27 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
+//  check user is authorized or not
+API.interceptors.response.use(
+  (response) => response, // If response is OK, return it
+  (error) => {
+    if (error.response) {
+      // Check if the token has expired
+      console.log(error);
+      if (error.response.status === 401) {
+        console.log("Token expired. Logging out...");
+
+        // Perform any task (e.g., logout user, redirect, clear storage)
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+        window.location.href = "/auth/login"; // Redirect to login page
+      }
+    }
+    return Promise.reject(error); // Reject the error for further handling
+  }
+);
+
+
 // Auth API calls
 export const login = (data) => API.post("/auth/login", data);
 export const signup = (data) => API.post("/auth/signup", data);

@@ -34,7 +34,7 @@ const MessageCardOptions: React.FC<Props> = ({ messageOption, setMessageOption }
             setMessageOption(null);
           }}
         >
-          Delete chat
+          Delete message
         </li>
       </ul>
     </Box>
