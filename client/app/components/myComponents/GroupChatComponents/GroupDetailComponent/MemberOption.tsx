@@ -1,7 +1,12 @@
 import { toaster } from "@/app/components/ui/toaster";
 import { useGlobalState } from "@/app/context/GlobalProvider";
 import { ChatType, UserType } from "@/app/types/allTypes";
-import { chats, pinTheChat, removeMemberAPI, unpinTheChat } from "@/app/utils/api";
+import {
+  chats,
+  pinTheChat,
+  removeMemberAPI,
+  unpinTheChat,
+} from "@/app/utils/api";
 import { Box } from "@chakra-ui/react";
 import { AxiosError } from "axios";
 import React from "react";
@@ -10,9 +15,12 @@ interface Props {
   member: UserType | null;
   setMember: React.Dispatch<React.SetStateAction<UserType | null>>;
   setGroupMembers: React.Dispatch<React.SetStateAction<UserType[]>>;
-
 }
-const MemberOptions: React.FC<Props> = ({ member, setMember,setGroupMembers }) => {
+const MemberOptions: React.FC<Props> = ({
+  member,
+  setMember,
+  setGroupMembers,
+}) => {
   const {
     dark,
     showGroup,
@@ -22,27 +30,26 @@ const MemberOptions: React.FC<Props> = ({ member, setMember,setGroupMembers }) =
     setChats,
     setOtherUserId,
     setSelectedChat,
-    selectedChat
+    selectedChat,
   } = useGlobalState();
 
-  const removeMember=async()=>{
-    try{
-      const {data}=await removeMemberAPI(showGroup?._id,member?._id);
+  const removeMember = async () => {
+    try {
+      const { data } = await removeMemberAPI(showGroup?._id, member?._id);
       if (data.success) {
-              const updatedChat = createGroupChat(data.chat);
-              setShowGroup(updatedChat);
-              if(updatedChat?.users)
-              setGroupMembers(updatedChat?.users);
-              if (selectedChat?._id === showGroup?._id) {
-                setSelectedChat(updatedChat);
-              }
-              toaster.create({
-                title: data?.message,
-                description: "Enjoy",
-                type: "success",
-              });
-            }
-    }catch(err){
+        const updatedChat = createGroupChat(data.chat);
+        setShowGroup(updatedChat);
+        if (updatedChat?.users) setGroupMembers(updatedChat?.users);
+        if (selectedChat?._id === showGroup?._id) {
+          setSelectedChat(updatedChat);
+        }
+        toaster.create({
+          title: data?.message,
+          description: "Enjoy",
+          type: "success",
+        });
+      }
+    } catch (err) {
       if (err instanceof AxiosError)
         toaster.create({
           title: err?.response?.data.message || "Error in login",
@@ -50,7 +57,7 @@ const MemberOptions: React.FC<Props> = ({ member, setMember,setGroupMembers }) =
           type: "error",
         });
     }
-  }
+  };
 
   const setChat = async (id: string | undefined) => {
     if (!id) {
@@ -93,14 +100,16 @@ const MemberOptions: React.FC<Props> = ({ member, setMember,setGroupMembers }) =
       boxShadow={!dark ? "md" : "none"}
       transition={"all .5s"}
     >
-    <ul className="option-ul">
+      <ul className="option-ul">
         {user?._id !== member?._id && (
           <li className="option-item" onClick={() => setChat(member?._id)}>
             Message
           </li>
         )}
         {user?._id === showGroup?.groupAdmin && (
-          <li className="option-item" onClick={removeMember}>Remove</li>
+          <li className="option-item" onClick={removeMember}>
+            Remove
+          </li>
         )}{" "}
       </ul>
     </Box>

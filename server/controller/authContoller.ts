@@ -69,6 +69,7 @@ export const login = catchAsync(
     user.password=undefined;
     console.log(user);
     res.status(200).json({
+      message:"Logged in successfully",
       success: true,
       jwt,
       user,

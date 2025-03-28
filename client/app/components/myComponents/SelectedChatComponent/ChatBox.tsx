@@ -8,7 +8,7 @@ import MessageCardOptions from "./MessageCardOptions";
 import { FaBan } from "react-icons/fa6";
 
 const ChatBox: React.FC<chatBoxProps> = ({ messages, boxRef }) => {
-  const { dark, user, selectedChat, setOtherUserId } = useGlobalState();
+  const { dark, user, selectedChat, setOtherUserId,setShowGroup } = useGlobalState();
   const [messageOption, setMessageOption] = useState<Message | null>(null);
   const myId = user?._id;
   useEffect(() => {
@@ -149,6 +149,7 @@ const ChatBox: React.FC<chatBoxProps> = ({ messages, boxRef }) => {
                           height: "30px",
                         }}
                         onClick={() => {
+                          setShowGroup(null);
                           setOtherUserId(message.sender?._id);
                         }}
                       >

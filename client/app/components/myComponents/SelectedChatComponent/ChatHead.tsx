@@ -95,6 +95,7 @@ const ChatHead = () => {
           onClick={() => {
             if (selectedChat?.userId) setOtherUserId(selectedChat?.userId);
             if (selectedChat?.isGroupedChat) {
+              setOtherUserId(undefined);
               setShowGroup(selectedChat);
             }
           }}
@@ -116,6 +117,7 @@ const ChatHead = () => {
           onClick={() => {
             if (selectedChat?.userId) setOtherUserId(selectedChat?.userId);
             if (selectedChat?.isGroupedChat) {
+              setOtherUserId(undefined);
               setShowGroup(selectedChat);
             }
           }}

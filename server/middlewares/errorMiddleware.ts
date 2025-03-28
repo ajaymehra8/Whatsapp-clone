@@ -11,10 +11,11 @@ export default (
   next: NextFunction
 ) => {
   let code: number;
+  console.log(err);
   if (err.isOperational) {
     code = err.code || 500;
   } else {
-    code = 500;
+    code = err.code||500;
   }
   res.status(code).json({
     success: false,
