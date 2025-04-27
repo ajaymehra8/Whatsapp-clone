@@ -1,16 +1,6 @@
-import mongoose, { Schema, Document, Model } from "mongoose";
-// Define an interface for the user document
-export interface IMessage extends Document {
-  _id: mongoose.Types.ObjectId;
-  sender: mongoose.Types.ObjectId;
-  chat: mongoose.Types.ObjectId;
-  content: string;
-  deletedFor?: mongoose.Types.ObjectId[];
-  deletedForEveryone?: boolean;
-  notification?: mongoose.Types.ObjectId;
-}
+import mongoose from "mongoose";
 
-const messageSchema: Schema<IMessage> = new mongoose.Schema<IMessage>(
+const messageSchema = new mongoose.Schema(
   {
     sender: {
       type: mongoose.Schema.Types.ObjectId,
@@ -43,8 +33,6 @@ const messageSchema: Schema<IMessage> = new mongoose.Schema<IMessage>(
   },
   { timestamps: true }
 );
-const messageModel: Model<IMessage> = mongoose.model<IMessage>(
-  "Message",
-  messageSchema
-);
+
+const messageModel = mongoose.model("Message", messageSchema);
 export default messageModel;
