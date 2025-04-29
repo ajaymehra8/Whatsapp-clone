@@ -1,6 +1,18 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
+import { Document, Types } from "mongoose";
 
-const messageSchema = new mongoose.Schema(
+export interface IMessage extends Document {
+  sender: Types.ObjectId;
+  chat: Types.ObjectId;
+  content: string;
+  deletedFor: Types.ObjectId[];
+  deletedForEveryone: boolean;
+  notification?: Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+const messageSchema = new Schema<IMessage>(
   {
     sender: {
       type: mongoose.Schema.Types.ObjectId,
@@ -34,5 +46,5 @@ const messageSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const messageModel = mongoose.model("Message", messageSchema);
-export default messageModel;
+const MessageModel = mongoose.model<IMessage>("Message", messageSchema);
+export default MessageModel;
